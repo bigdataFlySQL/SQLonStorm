@@ -7,7 +7,7 @@ package operation;
 public class TCItem {
 
     private String tableName;//表名
-    private String colName;//属性名
+    private String colName;//属性名   特别情况 * 表示选择全部列
     private boolean isCompare; //是否参与比较
     private String comparator;// 比较符号 >,<,=,!=
     private int comIntVal; // 所比较的数值
