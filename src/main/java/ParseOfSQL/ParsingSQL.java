@@ -13,10 +13,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-import operation.AggregationStream;
-import operation.AgregationFunFactor;
-import operation.Projection;
-import operation.TCItem;
+import operation.*;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -38,14 +35,17 @@ public class ParsingSQL extends TestCase {
     // join 操作，key(String):连接的表名 value(List<String>): 与主表相连的字段
     private HashMap<String, List<String>> joinsMap = new HashMap<String, List<String>>();
     // where 后面表达式生成and 和 or 的二叉树
-    private BinaryTreeAndOr mSeleectRootExp = null;
+    private BinaryTreeAndOr mSelectRootExp = null;
 
 
     public void testparsingTheSQL() throws Exception {
 //        final String statement = "SELECT sku_id,MAX(attr1) as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
 //                final String statement="SELECT * FROM jingdongdata.JData_Product LIMIT 3,1000";
 
-               final String statement="SELECT sku_id as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
+//               final String statement="SELECT sku_id as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
+//                final String statement = "SELECT * FROM jingdongdata.JData_Product where JData_Product.sku_id <= 10000 and attr1>2 LIMIT 1000";
+
+        final String statement = "SELECT * FROM jingdongdata.JData_Product LEFT OUTER JOIN jingdongdata.JData_Comment on JData_Product.sku_id = JData_Comment.sku_id and JData_Product.sku_id = JData_Comment.comment_number INNER JOIN JData_abc on JData_Product.sku_id = JData_abc.y";
 
         Select select = (Select) parserManager.parse(new StringReader(statement));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -74,7 +74,7 @@ public class ParsingSQL extends TestCase {
 
                     TCItem tcItem = new TCItem();
                     String tTabName = col.getTable().toString();
-                    if (tTabName==null || tTabName.isEmpty()) {
+                    if (tTabName == null || tTabName.isEmpty()) {
                         tTabName = fromTables.get(0).toString();
                     }
                     tcItem.setTableName(tTabName);
@@ -111,7 +111,7 @@ public class ParsingSQL extends TestCase {
 
             }
         }
-        assertEquals(3,Projection.proList.size());
+//        assertEquals(3,Projection.proList.size());
         //endregion
 
         //region 获取 LIMIT
@@ -134,8 +134,12 @@ public class ParsingSQL extends TestCase {
         //endregion
 
 
-        //region 获取 where
+        //region 获取 where, 并把得到的选择语义添加到Selection.binaryTreeAndOr 中
         getWhere(plainSelect);
+        if (mSelectRootExp != null) {
+            Selection.binaryTreeAndOr = mSelectRootExp;
+        }
+        assertEquals(mSelectRootExp, Selection.binaryTreeAndOr);
         for (GreaterThan item : greaterThanList) {
             System.out.println(item.getLeftExpression() + "> " + item.getRightExpression());
         }
@@ -161,6 +165,9 @@ public class ParsingSQL extends TestCase {
         //endregion
 
         //region 获取join
+        if (!fromTables.isEmpty()){
+            JoinCondition.originTabName = fromTables.get(0).toString();
+        }
         getJoins(plainSelect);
         //endregion
 
@@ -177,30 +184,72 @@ public class ParsingSQL extends TestCase {
 
 
     private void getJoins(PlainSelect plainSelect) {
-        List<Join> mJoins = plainSelect.getJoins();
+        List<Join> mJoins = plainSelect.getJoins(); // 注意select * from tab1,tab2 第二个表也为join Item
         if (mJoins != null) {
             for (Join itemJoin : mJoins) {
                 String tjoinTableName = ((Table) itemJoin.getRightItem()).getFullyQualifiedName();
+                String joinType = ""; // 连接类型目前仅支持 outter join ,inner join , left join
+                if (itemJoin.isInner()) {
+                    joinType = "Inner";
+                } else if (itemJoin.isOuter()) {
+                    joinType = "Outer";
+                } else {
+                    joinType = "Left";
+                }
+                tjoinTableName += "|" + joinType;
                 Expression onExp = itemJoin.getOnExpression();
-                List<String> tValList = new ArrayList<String>();
                 if (onExp instanceof AndExpression) {
+                    // 解析 tab1.a = tab2.b and tab1.a=tab2.c  默认格式必须为 表名.列名
                     AndExpression tempAndExp = (AndExpression) onExp;
-                    tValList.add(tempAndExp.getRightExpression().toString());
+                    EqualsTo righExpEqualsTo = (EqualsTo) tempAndExp.getRightExpression();
+
+                    //保存至JoinConditon
+                    saveJoinCondition(tjoinTableName, righExpEqualsTo);
+
                     Expression leftExp = tempAndExp.getLeftExpression();
                     while (leftExp instanceof AndExpression) {
                         tempAndExp = (AndExpression) leftExp;
-                        tValList.add(tempAndExp.getRightExpression().toString());
                         leftExp = tempAndExp.getLeftExpression();
                     }
-                    tValList.add(leftExp.toString());
+                    EqualsTo tEqualsTo = (EqualsTo) leftExp;
+                    //保存至JoinConditon
+                    saveJoinCondition(tjoinTableName, tEqualsTo);
                 } else {
-                    tValList.add(onExp.toString());
+                    EqualsTo tEqualsTo = (EqualsTo) onExp;
+                    //保存至JoinConditon
+                    saveJoinCondition(tjoinTableName, tEqualsTo);
                 }
-                joinsMap.put(tjoinTableName, tValList);
-                scanList(tValList);
+
             }
+
+            assertEquals(2,JoinCondition.linkTablemap.size());
         }
     }
+
+    /**
+     * 举例 left join tab2 on tab1.a = tab2.A
+     *
+     * @param joinTableType   tab2_left
+     * @param righExpEqualsTo tab1.a = tab2.A
+     */
+    public void saveJoinCondition(String joinTableType, EqualsTo righExpEqualsTo) {
+        //region 保存至JoinConditon
+        Column leftCol = (Column) righExpEqualsTo.getLeftExpression();
+        Column rightCol = (Column) righExpEqualsTo.getRightExpression();
+        TCItem leftTCItem = new TCItem();
+        leftTCItem.setColName(leftCol.getColumnName());
+        leftTCItem.setTableName(leftCol.getTable().getName());
+        TCItem rightTCItem = new TCItem();
+        rightTCItem.setColName(rightCol.getColumnName());
+        rightTCItem.setTableName(rightCol.getTable().getName());
+
+        JoinTwoTable joinTwoTable = new JoinTwoTable();
+        joinTwoTable.setTcItemLeft(leftTCItem);
+        joinTwoTable.setTcItemRight(rightTCItem);
+        JoinCondition.linkTablemap.put(joinTableType, joinTwoTable);
+        //endregion
+    }
+
 
     // 返回group 的列名集合
     private List<String> getGroups(PlainSelect plainSelect) {
@@ -285,9 +334,9 @@ public class ParsingSQL extends TestCase {
         if (whereExp != null) {
             String whereStr = whereExp.toString();
             System.out.println(whereStr);
-            mSeleectRootExp = new BinaryTreeAndOr();
-            mSeleectRootExp.root = new BinaryTreeAnrOrNode();
-            solveAndOr(whereExp, true, mSeleectRootExp.root);
+            mSelectRootExp = new BinaryTreeAndOr();
+            mSelectRootExp.root = new BinaryTreeAnrOrNode();
+            solveAndOr(whereExp, true, mSelectRootExp.root);
 
         }
 
