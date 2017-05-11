@@ -9,5 +9,5 @@ import java.util.HashMap;
 public class JoinCondition {
     public static String originTabName = null; //左边的表名
     // 右边的表，即要连接的表和连接的字段 key: 表名_连接类型  如tab2_outer join  value:连接的字段JoinTwoTable
-    public static HashMap<String,JoinTwoTable> linkTablemap=null;
+    public static HashMap<String,JoinTwoTable> linkTablemap=new HashMap<String, JoinTwoTable>();
 }
