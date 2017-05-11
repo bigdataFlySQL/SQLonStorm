@@ -45,7 +45,7 @@ public class ParsingSQL extends TestCase {
 //               final String statement="SELECT sku_id as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
 //                final String statement = "SELECT * FROM jingdongdata.JData_Product where JData_Product.sku_id <= 10000 and attr1>2 LIMIT 1000";
 
-        final String statement = "SELECT * FROM jingdongdata.JData_Product LEFT OUTER JOIN jingdongdata.JData_Comment on JData_Product.sku_id = JData_Comment.sku_id and JData_Product.sku_id = JData_Comment.comment_number INNER JOIN JData_abc on JData_Product.sku_id = JData_abc.y";
+        final String statement = "SELECT * FROM jingdongdata.JData_Product LEFT OUTER JOIN jingdongdata.JData_Comment on JData_Product.sku_id = JData_Comment.sku_id and JData_Product.sku_id = JData_Comment.comment_number INNER JOIN JData_abc on JData_Product.sku_id = JData_abc.y group by JData_Product.sku_id,JData_Product.attr1";
 
         Select select = (Select) parserManager.parse(new StringReader(statement));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -53,6 +53,7 @@ public class ParsingSQL extends TestCase {
         //region 获取 From tableNames
         List<String> fromTables = getFromTables(plainSelect);
         scanList(fromTables);
+        String originTable = fromTables.get(0);
         //endregion
 
         //region 获取映射的属性
@@ -172,8 +173,7 @@ public class ParsingSQL extends TestCase {
         //endregion
 
         //region 获取group
-        List<String> groupsExpStrList = getGroups(plainSelect);
-        scanList(groupsExpStrList);
+        getGroups(originTable,plainSelect);
         //endregion
 
         //region 获取having
@@ -251,17 +251,28 @@ public class ParsingSQL extends TestCase {
     }
 
 
-    // 返回group 的列名集合
-    private List<String> getGroups(PlainSelect plainSelect) {
-        List<String> groupStrs = new ArrayList<String>();
-
+    /**
+     * 解析group by的语义，并保存到GoupBy 中
+     * @param defalutTable 默认的表名
+     * @param plainSelect SQL
+     *
+     */
+    private void getGroups(String defalutTable, PlainSelect plainSelect) {
         List<Expression> groupExps = plainSelect.getGroupByColumnReferences();
         if (groupExps != null) {
             for (Expression item : groupExps) {
-                groupStrs.add(item.toString());
+                Column column = (Column)item;
+                TCItem tcItem = new TCItem();
+                tcItem.setColName(column.getColumnName());
+                if (column.getTable().getName()==null ||column.getTable().getName().isEmpty() ){
+                    tcItem.setTableName(defalutTable);
+                }else{
+                    tcItem.setTableName(column.getTable().getName());
+                }
+                GroupBy.groupList.add(tcItem);
             }
         }
-        return groupStrs;
+//        assertEquals(2,GroupBy.groupList.size());
     }
 
     // 返回from 的表名集合
