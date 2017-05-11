@@ -1,0 +1,29 @@
+CREATE TABLE `JData_Action_201602` (
+  `user_id` int(11) DEFAULT NULL,
+  `sku_id` int(11) DEFAULT NULL,
+  `time` datetime DEFAULT NULL,
+  `model_id` varchar(5) DEFAULT NULL,
+  `type` int(11) DEFAULT NULL,
+  `cate` int(11) DEFAULT NULL,
+  `brand` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `JData_Action_201603` (
+  `user_id` int(11) DEFAULT NULL,
+  `sku_id` int(11) DEFAULT NULL,
+  `time` datetime DEFAULT NULL,
+  `model_id` varchar(5) DEFAULT NULL,
+  `type` int(11) DEFAULT NULL,
+  `cate` int(11) DEFAULT NULL,
+  `brand` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `JData_Action_201605` (
+  `user_id` int(11) DEFAULT NULL,
+  `sku_id` int(11) DEFAULT NULL,
+  `time` datetime DEFAULT NULL,
+  `model_id` varchar(5) DEFAULT NULL,
+  `type` int(11) DEFAULT NULL,
+  `cate` int(11) DEFAULT NULL,
+  `brand` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
