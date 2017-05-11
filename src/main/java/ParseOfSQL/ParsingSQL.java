@@ -43,9 +43,9 @@ public class ParsingSQL extends TestCase {
 //                final String statement="SELECT * FROM jingdongdata.JData_Product LIMIT 3,1000";
 
 //               final String statement="SELECT sku_id as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
-//                final String statement = "SELECT * FROM jingdongdata.JData_Product where JData_Product.sku_id <= 10000 and attr1>2 LIMIT 1000";
+                final String statement = "SELECT * FROM jingdongdata.JData_Product where JData_Product.sku_id > 10000 and JData_Product.attr1>2 LIMIT 1000";
 
-        final String statement = "SELECT * FROM jingdongdata.JData_Product LEFT OUTER JOIN jingdongdata.JData_Comment on JData_Product.sku_id = JData_Comment.sku_id and JData_Product.sku_id = JData_Comment.comment_number INNER JOIN JData_abc on JData_Product.sku_id = JData_abc.y group by JData_Product.sku_id,JData_Product.attr1";
+//        final String statement = "SELECT * FROM jingdongdata.JData_Product LEFT OUTER JOIN jingdongdata.JData_Comment on JData_Product.sku_id = JData_Comment.sku_id and JData_Product.sku_id = JData_Comment.comment_number INNER JOIN JData_abc on JData_Product.sku_id = JData_abc.y group by JData_Product.sku_id,JData_Product.attr1";
 
         Select select = (Select) parserManager.parse(new StringReader(statement));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -293,23 +293,75 @@ public class ParsingSQL extends TestCase {
         return results;
     }
 
-    private void explain(Expression rightExp) {
-        if (rightExp instanceof GreaterThan) {
-            greaterThanList.add((GreaterThan) rightExp);
+    private void explain(BinaryTreeAnrOrNode leaf, Expression rightExp) {
+        TCItem tcItem = new TCItem();
+        tcItem.setCompare(true);
 
+        if (rightExp instanceof GreaterThan) {
+            // JData_Product.sku_id > 10000
+            GreaterThan tgh = (GreaterThan)rightExp;
+            Column column = (Column) tgh.getLeftExpression();
+            tcItem.setColName(column.getColumnName());
+            tcItem.setTableName(column.getTable().getName());
+            int compVal = Integer.valueOf(tgh.getRightExpression().toString());
+            tcItem.setComIntVal(compVal);
+            tcItem.setComparator(">");
+            greaterThanList.add((GreaterThan) rightExp);
         } else if (rightExp instanceof GreaterThanEquals) {
+            // JData_Product.sku_id >= 78
+            GreaterThanEquals tghe = (GreaterThanEquals)rightExp;
+            Column column = (Column) tghe.getLeftExpression();
+            tcItem.setColName(column.getColumnName());
+            tcItem.setTableName(column.getTable().getName());
+            int compVal = Integer.valueOf(tghe.getRightExpression().toString());
+            tcItem.setComIntVal(compVal);
+            tcItem.setComparator(">=");
             greaterThanEqualsList.add((GreaterThanEquals) rightExp);
 
         } else if (rightExp instanceof MinorThan) {
+            // JData_Product.sku_id < 7
+            MinorThan mt = (MinorThan)rightExp;
+            Column column = (Column) mt.getLeftExpression();
+            tcItem.setColName(column.getColumnName());
+            tcItem.setTableName(column.getTable().getName());
+            int compVal = Integer.valueOf(mt.getRightExpression().toString());
+            tcItem.setComIntVal(compVal);
+            tcItem.setComparator("<");
             minorThanList.add((MinorThan) rightExp);
 
         } else if (rightExp instanceof MinorThanEquals) {
+            // JData_Product.sku_id <= 7
+            MinorThanEquals mte = (MinorThanEquals)rightExp;
+            Column column = (Column) mte.getLeftExpression();
+            tcItem.setColName(column.getColumnName());
+            tcItem.setTableName(column.getTable().getName());
+            int compVal = Integer.valueOf(mte.getRightExpression().toString());
+            tcItem.setComIntVal(compVal);
+            tcItem.setComparator("<=");
             minorThanEqualsList.add((MinorThanEquals) rightExp);
         } else if (rightExp instanceof NotEqualsTo) {
+            // JData_Product.sku_id != 7
+            NotEqualsTo neto = (NotEqualsTo)rightExp;
+            Column column = (Column) neto.getLeftExpression();
+            tcItem.setColName(column.getColumnName());
+            tcItem.setTableName(column.getTable().getName());
+            int compVal = Integer.valueOf(neto.getRightExpression().toString());
+            tcItem.setComIntVal(compVal);
+            tcItem.setComparator("!=");
+
             notEqualsToList.add((NotEqualsTo) rightExp);
         } else if (rightExp instanceof EqualsTo) {
+            // JData_Product.sku_id = 7
+            EqualsTo eto = (EqualsTo)rightExp;
+            Column column = (Column) eto.getLeftExpression();
+            tcItem.setColName(column.getColumnName());
+            tcItem.setTableName(column.getTable().getName());
+            int compVal = Integer.valueOf(eto.getRightExpression().toString());
+            tcItem.setComIntVal(compVal);
+            tcItem.setComparator("=");
             equalsToList.add((EqualsTo) rightExp);
         }
+        leaf.setMcItem(tcItem);
     }
 
     //递归解析 and 和 or 混合表达式,并生成相关的选择表达式树
@@ -317,7 +369,7 @@ public class ParsingSQL extends TestCase {
         if (!flag) {
             root.isLeave = true;
             root.setmExp(exp);
-            explain(exp);
+            explain(root, exp);
         } else {
             if (exp instanceof AndExpression) {
                 AndExpression newexp = (AndExpression) exp;
