@@ -168,19 +168,18 @@ public class ParsingSQL extends TestCase {
         //endregion
 
         //region 获取join
-        if (!fromTables.isEmpty()){
+        if (!fromTables.isEmpty()) {
             JoinCondition.originTabName = fromTables.get(0).toString();
         }
         getJoins(plainSelect);
         //endregion
 
         //region 获取group
-        getGroups(originTable,plainSelect);
+        getGroups(originTable, plainSelect);
         //endregion
 
         //region 获取having
-        List<String> havingExpList = getHaving(plainSelect);
-        scanList(havingExpList);
+        getHaving(plainSelect);
         //endregion
     }
 
@@ -224,7 +223,7 @@ public class ParsingSQL extends TestCase {
 
             }
 
-            assertEquals(2,JoinCondition.linkTablemap.size());
+            assertEquals(2, JoinCondition.linkTablemap.size());
         }
     }
 
@@ -255,20 +254,20 @@ public class ParsingSQL extends TestCase {
 
     /**
      * 解析group by的语义，并保存到GoupBy 中
-     * @param defalutTable 默认的表名
-     * @param plainSelect SQL
      *
+     * @param defalutTable 默认的表名
+     * @param plainSelect  SQL
      */
     private void getGroups(String defalutTable, PlainSelect plainSelect) {
         List<Expression> groupExps = plainSelect.getGroupByColumnReferences();
         if (groupExps != null) {
             for (Expression item : groupExps) {
-                Column column = (Column)item;
+                Column column = (Column) item;
                 TCItem tcItem = new TCItem();
                 tcItem.setColName(column.getColumnName());
-                if (column.getTable().getName()==null ||column.getTable().getName().isEmpty() ){
+                if (column.getTable().getName() == null || column.getTable().getName().isEmpty()) {
                     tcItem.setTableName(defalutTable);
-                }else{
+                } else {
                     tcItem.setTableName(column.getTable().getName());
                 }
                 GroupBy.groupList.add(tcItem);
@@ -301,7 +300,7 @@ public class ParsingSQL extends TestCase {
 
         if (rightExp instanceof GreaterThan) {
             // JData_Product.sku_id > 10000
-            GreaterThan tgh = (GreaterThan)rightExp;
+            GreaterThan tgh = (GreaterThan) rightExp;
             Column column = (Column) tgh.getLeftExpression();
             tcItem.setColName(column.getColumnName());
             tcItem.setTableName(column.getTable().getName());
@@ -311,7 +310,7 @@ public class ParsingSQL extends TestCase {
             greaterThanList.add((GreaterThan) rightExp);
         } else if (rightExp instanceof GreaterThanEquals) {
             // JData_Product.sku_id >= 78
-            GreaterThanEquals tghe = (GreaterThanEquals)rightExp;
+            GreaterThanEquals tghe = (GreaterThanEquals) rightExp;
             Column column = (Column) tghe.getLeftExpression();
             tcItem.setColName(column.getColumnName());
             tcItem.setTableName(column.getTable().getName());
@@ -322,7 +321,7 @@ public class ParsingSQL extends TestCase {
 
         } else if (rightExp instanceof MinorThan) {
             // JData_Product.sku_id < 7
-            MinorThan mt = (MinorThan)rightExp;
+            MinorThan mt = (MinorThan) rightExp;
             Column column = (Column) mt.getLeftExpression();
             tcItem.setColName(column.getColumnName());
             tcItem.setTableName(column.getTable().getName());
@@ -333,7 +332,7 @@ public class ParsingSQL extends TestCase {
 
         } else if (rightExp instanceof MinorThanEquals) {
             // JData_Product.sku_id <= 7
-            MinorThanEquals mte = (MinorThanEquals)rightExp;
+            MinorThanEquals mte = (MinorThanEquals) rightExp;
             Column column = (Column) mte.getLeftExpression();
             tcItem.setColName(column.getColumnName());
             tcItem.setTableName(column.getTable().getName());
@@ -343,7 +342,7 @@ public class ParsingSQL extends TestCase {
             minorThanEqualsList.add((MinorThanEquals) rightExp);
         } else if (rightExp instanceof NotEqualsTo) {
             // JData_Product.sku_id != 7
-            NotEqualsTo neto = (NotEqualsTo)rightExp;
+            NotEqualsTo neto = (NotEqualsTo) rightExp;
             Column column = (Column) neto.getLeftExpression();
             tcItem.setColName(column.getColumnName());
             tcItem.setTableName(column.getTable().getName());
@@ -354,7 +353,7 @@ public class ParsingSQL extends TestCase {
             notEqualsToList.add((NotEqualsTo) rightExp);
         } else if (rightExp instanceof EqualsTo) {
             // JData_Product.sku_id = 7
-            EqualsTo eto = (EqualsTo)rightExp;
+            EqualsTo eto = (EqualsTo) rightExp;
             Column column = (Column) eto.getLeftExpression();
             tcItem.setColName(column.getColumnName());
             tcItem.setTableName(column.getTable().getName());
@@ -408,37 +407,77 @@ public class ParsingSQL extends TestCase {
     }
 
     //返回 having 后的聚集操作，目前只考虑仅有一个having条件 即 having a.b >1
-    private List<String> getHaving(PlainSelect plainSelect) {
+    private void getHaving(PlainSelect plainSelect) {
         List<String> havingList = new ArrayList<String>();
         Expression havExp = plainSelect.getHaving();
         if (havExp != null) {
             String havingStr = havExp.toString();
             System.out.println(havingStr);
-            String ansStr = "";
+
+            TCItem tcItem = new TCItem();
+            tcItem.setCompare(true);
             if (havExp instanceof GreaterThan) {
+                // having tabl.a > 100
                 GreaterThan gt = (GreaterThan) havExp;
-                ansStr = gt.getLeftExpression().toString() + ">" + gt.getRightExpression().toString();
+                Column column = (Column) gt.getLeftExpression();
+                tcItem.setColName(column.getColumnName());
+                tcItem.setColName(column.getTable().getName());
+                tcItem.setComparator(">");
+                tcItem.setComIntVal(Integer.valueOf(gt.getRightExpression().toString()));
+                AggregationStream.havingList.add(tcItem);
+
             } else if (havExp instanceof GreaterThanEquals) {
+                // having tabl.a >= 100
                 GreaterThanEquals gte = (GreaterThanEquals) havExp;
-                ansStr = gte.getLeftExpression().toString() + ">=" + gte.getRightExpression().toString();
+                Column column = (Column) gte.getLeftExpression();
+                tcItem.setColName(column.getColumnName());
+                tcItem.setColName(column.getTable().getName());
+                tcItem.setComparator(">=");
+                tcItem.setComIntVal(Integer.valueOf(gte.getRightExpression().toString()));
+                AggregationStream.havingList.add(tcItem);
 
             } else if (havExp instanceof MinorThan) {
+                // having tabl.a < 100
                 MinorThan mt = (MinorThan) havExp;
-                ansStr = mt.getLeftExpression().toString() + "<" + mt.getRightExpression().toString();
+                Column column = (Column) mt.getLeftExpression();
+                tcItem.setColName(column.getColumnName());
+                tcItem.setColName(column.getTable().getName());
+                tcItem.setComparator("<");
+                tcItem.setComIntVal(Integer.valueOf(mt.getRightExpression().toString()));
+                AggregationStream.havingList.add(tcItem);
 
             } else if (havExp instanceof MinorThanEquals) {
+                // having tabl.a <= 100
                 MinorThanEquals mte = (MinorThanEquals) havExp;
-                ansStr = mte.getLeftExpression().toString() + "<=" + mte.getRightExpression().toString();
+                Column column = (Column) mte.getLeftExpression();
+                tcItem.setColName(column.getColumnName());
+                tcItem.setColName(column.getTable().getName());
+                tcItem.setComparator("<=");
+                tcItem.setComIntVal(Integer.valueOf(mte.getRightExpression().toString()));
+                AggregationStream.havingList.add(tcItem);
+
             } else if (havExp instanceof NotEqualsTo) {
+                // having tabl.a != 100
                 NotEqualsTo net = (NotEqualsTo) havExp;
-                ansStr = net.getLeftExpression().toString() + "!=" + net.getRightExpression().toString();
+                Column column = (Column) net.getLeftExpression();
+                tcItem.setColName(column.getColumnName());
+                tcItem.setColName(column.getTable().getName());
+                tcItem.setComparator("!=");
+                tcItem.setComIntVal(Integer.valueOf(net.getRightExpression().toString()));
+                AggregationStream.havingList.add(tcItem);
+
+
             } else if (havExp instanceof EqualsTo) {
+                // having tabl.a = 100
                 EqualsTo et = (EqualsTo) havExp;
-                ansStr = et.getLeftExpression().toString() + "==" + et.getRightExpression().toString();
+                Column column = (Column) et.getLeftExpression();
+                tcItem.setColName(column.getColumnName());
+                tcItem.setColName(column.getTable().getName());
+                tcItem.setComparator("!=");
+                tcItem.setComIntVal(Integer.valueOf(et.getRightExpression().toString()));
+                AggregationStream.havingList.add(tcItem);
             }
-            havingList.add(ansStr);
         }
-        return havingList;
     }
 
     private boolean isNotNull(Expression exr) {

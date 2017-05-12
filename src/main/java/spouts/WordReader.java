@@ -147,6 +147,8 @@ public class WordReader extends BaseRichSpout {
                 List<TCItem> tg = GroupBy.groupList;
                 System.out.println(AggregationStream.agreFunList.size());
                 List<AgregationFunFactor> ag = AggregationStream.agreFunList;
+                System.out.println(AggregationStream.havingList.size());
+                List<TCItem> th = AggregationStream.havingList;
                 // endregion
             }
         } catch (FileNotFoundException e) {
