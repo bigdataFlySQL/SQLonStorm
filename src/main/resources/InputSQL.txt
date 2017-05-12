@@ -1,4 +1,4 @@
-SELECT * FROM JData_Product where JData_Product.attr2>2
+SELECT * FROM JData_Product where JData_Product.attr2>2 group by JData_Product.sku_id having JData_Product.sku_id <100
 SELECT sku_id,MAX(attr1) as a,attr1,JData_Product.attr2 FROM JData_Product
 SELECT * FROM JData_Product where JData_Product.sku_id > 10000 and JData_Product.attr1>2 LIMIT 1000
 SELECT * FROM JData_Product LEFT OUTER JOIN JData_Comment on JData_Product.sku_id = JData_Comment.sku_id and JData_Product.sku_id = JData_Comment.comment_number INNER JOIN JData_abc on JData_Product.sku_id = JData_abc.y group by JData_Product.sku_id,JData_Product.attr1
