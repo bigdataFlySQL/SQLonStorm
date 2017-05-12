@@ -32,9 +32,9 @@ public class SelectTest extends TestCase {
     // where 后面表达式生成and 和 or 的二叉树
     private BinaryTreeAndOr mSeleectRootExp= null;
 
-    public SelectTest(String arg0) {
-        super(arg0);
-    }
+//    public SelectTest(String arg0) {
+//        super(arg0);
+//    }
 
     public void testColumnName() throws Exception {
 //        final String statement="SELECT sku_id as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
