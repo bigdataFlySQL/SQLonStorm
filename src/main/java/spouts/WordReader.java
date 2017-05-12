@@ -3,24 +3,32 @@ package spouts;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Map;
 
+import ParseOfSQL.ParsingSQL;
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import domain.BinaryTreeAndOr;
+import domain.BinaryTreeAnrOrNode;
+import operation.*;
+import test.SelectTest;
 
 public class WordReader extends BaseRichSpout {
 
     private SpoutOutputCollector collector;
     private FileReader fileReader;
     private boolean completed = false;
+    private ParsingSQL parsingSQL;
 
     public void ack(Object msgId) {
         System.out.println("OK:" + msgId);
@@ -99,7 +107,7 @@ public class WordReader extends BaseRichSpout {
                 tempStr += rs.getInt("attr1") + "|";
                 tempStr += rs.getInt("attr2");
                 System.out.println(tempStr);
-                this.collector.emit(new Values(tempStr),tempStr);
+                this.collector.emit(new Values(tempStr), tempStr);
             }
 
             conn.close();
@@ -117,9 +125,36 @@ public class WordReader extends BaseRichSpout {
     public void open(Map conf, TopologyContext context,
                      SpoutOutputCollector collector) {
         try {
-            this.fileReader = new FileReader(conf.get("wordsFile").toString());
+            this.fileReader = new FileReader(conf.get("InputSQL").toString());
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String sql = "";
+            parsingSQL = new ParsingSQL();
+            while ((sql = bufferedReader.readLine()) != null) {
+                // 读取sql ,解析sql
+                System.out.println(sql);
+                parsingSQL.testparsingTheSQL(sql);
+
+                //region 测试SQL 语义是否解析成功
+                System.out.println(Selection.binaryTreeAndOr == null);
+                BinaryTreeAndOr binaryTreeAndOr = Selection.binaryTreeAndOr;
+                System.out.println(Projection.proList.size());
+                List<TCItem> tp = Projection.proList;
+                System.out.println(Selection.fromTableList.size());
+                List<String> ft= Selection.fromTableList;
+                System.out.println(JoinCondition.linkTablemap.size());
+                Map<String,JoinTwoTable> tj = JoinCondition.linkTablemap;
+                System.out.print(GroupBy.groupList.size());
+                List<TCItem> tg = GroupBy.groupList;
+                System.out.println(AggregationStream.agreFunList.size());
+                List<AgregationFunFactor> ag = AggregationStream.agreFunList;
+                // endregion
+            }
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Error reading file [" + conf.get("wordFile") + "]");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         this.collector = collector;
     }

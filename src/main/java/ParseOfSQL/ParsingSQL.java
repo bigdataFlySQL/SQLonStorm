@@ -38,12 +38,12 @@ public class ParsingSQL extends TestCase {
     private BinaryTreeAndOr mSelectRootExp = null;
 
 
-    public void testparsingTheSQL() throws Exception {
+    public void testparsingTheSQL(String statement) throws Exception {
 //        final String statement = "SELECT sku_id,MAX(attr1) as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
 //                final String statement="SELECT * FROM jingdongdata.JData_Product LIMIT 3,1000";
 
 //               final String statement="SELECT sku_id as a,attr1,JData_Product.attr2 FROM jingdongdata.JData_Product";
-                final String statement = "SELECT * FROM jingdongdata.JData_Product where JData_Product.sku_id > 10000 and JData_Product.attr1>2 LIMIT 1000";
+//                final String statement = "SELECT * FROM jingdongdata.JData_Product where JData_Product.sku_id > 10000 and JData_Product.attr1>2 LIMIT 1000";
 
 //        final String statement = "SELECT * FROM jingdongdata.JData_Product LEFT OUTER JOIN jingdongdata.JData_Comment on JData_Product.sku_id = JData_Comment.sku_id and JData_Product.sku_id = JData_Comment.comment_number INNER JOIN JData_abc on JData_Product.sku_id = JData_abc.y group by JData_Product.sku_id,JData_Product.attr1";
 
@@ -52,6 +52,7 @@ public class ParsingSQL extends TestCase {
 
         //region 获取 From tableNames
         List<String> fromTables = getFromTables(plainSelect);
+        Selection.fromTableList = fromTables;
         scanList(fromTables);
         String originTable = fromTables.get(0);
         //endregion
@@ -66,6 +67,7 @@ public class ParsingSQL extends TestCase {
                 TCItem tcItem = new TCItem();
                 tcItem.setColName("*");
                 tcItem.setTableName(fromTables.get(0).toString());
+                Projection.proList.add(tcItem);
             } else {
                 SelectExpressionItem sEI = (SelectExpressionItem) item;
                 Expression expr = sEI.getExpression();
