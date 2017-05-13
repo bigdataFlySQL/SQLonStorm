@@ -11,17 +11,17 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
+
+
 import ParseOfSQL.ParsingSQL;
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
 import domain.BinaryTreeAndOr;
-import domain.BinaryTreeAnrOrNode;
 import operation.*;
-import test.SelectTest;
 
 public class WordReader extends BaseRichSpout {
 
@@ -58,19 +58,6 @@ public class WordReader extends BaseRichSpout {
             }
             return;
         }
-//		String str;
-//		//Open the reader
-//		BufferedReader reader = new BufferedReader(fileReader);
-//		try{
-//			//Read all lines
-//			while((str = reader.readLine()) != null){
-//				/**
-//				 * By each line emmit a new value with the line as a their
-//				 */
-//				this.collector.emit(new Values(str),str);
-//			}
-
-
         // MySQL的JDBC URL编写方式：jdbc:mysql://主机名称：连接端口/数据库的名称?参数=值
         // 避免中文乱码要指定useUnicode和characterEncoding
         // 执行数据库操作之前要在数据库管理系统上创建一个数据库，名字自己定，

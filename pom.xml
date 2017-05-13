@@ -23,24 +23,30 @@
 	 </plugins>
   </build>
 
-  <repositories>
-        
-        <!-- Repository where we can found the storm dependencies  -->
-        <repository>
-            <id>clojars.org</id>
-            <url>http://clojars.org/repo</url>
-        </repository>
+  <!--<repositories>-->
+        <!---->
+        <!--&lt;!&ndash; Repository where we can found the storm dependencies  &ndash;&gt;-->
+        <!--<repository>-->
+            <!--<id>clojars.org</id>-->
+            <!--<url>http://clojars.org/repo</url>-->
+        <!--</repository>-->
 
-  </repositories>
+  <!--</repositories>-->
 
   <dependencies>
 
-        <!-- Storm Dependency -->
-        <dependency> 
-          <groupId>storm</groupId>
-          <artifactId>storm</artifactId>
-          <version>0.7.1</version>
-       </dependency>
+        <!--&lt;!&ndash; Storm Dependency &ndash;&gt;-->
+        <!--<dependency> -->
+          <!--<groupId>storm</groupId>-->
+          <!--<artifactId>storm</artifactId>-->
+          <!--<version>0.7.1</version>-->
+       <!--</dependency>-->
+      <!-- https://mvnrepository.com/artifact/org.apache.storm/storm-core -->
+      <dependency>
+          <groupId>org.apache.storm</groupId>
+          <artifactId>storm-core</artifactId>
+          <version>1.0.2</version>
+      </dependency>
 
       <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
       <dependency>
