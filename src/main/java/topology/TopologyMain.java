@@ -3,10 +3,9 @@ package topology;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.topology.TopologyBuilder;
-import spouts.WordReader;
+import spouts.StreamDataReaderSpout;
 
 
-import bolts.WordCounter;
 import bolts.WordNormalizer;
 
 
@@ -15,9 +14,9 @@ public class TopologyMain {
          
         //Topology definition
 		TopologyBuilder builder = new TopologyBuilder();
-		builder.setSpout("word-reader",new WordReader());
+		builder.setSpout("data-reader",new StreamDataReaderSpout());
 		builder.setBolt("word-normalizer", new WordNormalizer())
-			.shuffleGrouping("word-reader");
+			.shuffleGrouping("data-reader");
 //		builder.setBolt("word-counter", new WordCounter(),2)
 //				.shuffleGrouping("word-normalizer");
 //		builder.setBolt("word-counter", new WordCounter(),2)

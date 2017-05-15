@@ -23,7 +23,7 @@ import ParseOfSQL.ParsingSQL;
 import domain.BinaryTreeAndOr;
 import operation.*;
 
-public class WordReader extends BaseRichSpout {
+public class StreamDataReaderSpout extends BaseRichSpout {
 
     private SpoutOutputCollector collector;
     private FileReader fileReader;
