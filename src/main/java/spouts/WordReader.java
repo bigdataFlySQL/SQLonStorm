@@ -81,18 +81,22 @@ public class WordReader extends BaseRichSpout {
 
 
             Statement statement = conn.createStatement();
-            String sql = "SELECT * FROM JData_Product LIMIT 0, 10";
+            // 选择用户购物数据的2月份的数据表
+            String sql = "SELECT * FROM JData_Action_201602 LIMIT 0, 10";
             ResultSet rs = statement.executeQuery(sql);
             System.out.println("-----------------");
 
             String name = null;
             while (rs.next()) {
                 String tempStr = "";
+                tempStr += rs.getInt("user_id") + "|";
+
                 tempStr += rs.getInt("sku_id") + "|";
 
 //                System.out.println(rs.getInt("sku_id"));
-                tempStr += rs.getInt("attr1") + "|";
-                tempStr += rs.getInt("attr2");
+                tempStr += rs.getInt("type") + "|";
+                tempStr += rs.getInt("cate")+"|";
+                tempStr += rs.getInt("brand");
                 System.out.println(tempStr);
                 this.collector.emit(new Values(tempStr), tempStr);
             }

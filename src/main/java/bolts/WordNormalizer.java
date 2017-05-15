@@ -41,6 +41,7 @@ public class WordNormalizer extends BaseBasicBolt {
     }
 
     public void cleanup() {
+        System.out.println("打印结果");
         for (String item : results) {
             System.out.println(item);
         }
@@ -56,7 +57,8 @@ public class WordNormalizer extends BaseBasicBolt {
     public void execute(Tuple input, BasicOutputCollector collector) {
         String sentence = input.getString(0);
         String[] words = sentence.split("\\|");
-        if (Integer.valueOf(words[1]) > 2) {
+        //选择商品类型为8的数据
+        if (Integer.valueOf(words[3]) == 8) {
             String ansStr = "";
             for (int i = 0; i < words.length - 1; i++) {
                 ansStr += words[i] + ",";
