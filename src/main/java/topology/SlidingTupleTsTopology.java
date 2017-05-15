@@ -60,7 +60,7 @@ public class SlidingTupleTsTopology {
 //        } else {
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("test", conf, builder.createTopology());
-            Utils.sleep(40000);
+            Utils.sleep(300*1000);
             cluster.killTopology("test");
             cluster.shutdown();
 //        }

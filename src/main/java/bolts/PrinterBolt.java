@@ -38,10 +38,14 @@ public class PrinterBolt extends BaseBasicBolt {
       System.out.println(item);
       ans += item;
     }
+    if (ans>=100){
+      System.out.println("succeed");
+    }
 
     try{
-      FileWriter fileWriter = new FileWriter("/Users/yuxiao/项目/stormSQL/code/stormSlidingWindow/src/main/resources/result.txt",true);
-    fileWriter.append(ans+""+"\n");
+      FileWriter fileWriter = new FileWriter("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/result.txt",true);
+      System.out.println("ans "+ans);
+    fileWriter.write(ans+""+"\n");
     }catch (Exception e){
       e.printStackTrace();
     }
@@ -51,7 +55,7 @@ public class PrinterBolt extends BaseBasicBolt {
   @Override
   public void execute(Tuple tuple, BasicOutputCollector collector) {
 
-    System.out.println(tuple);
+    System.out.println("lilele: "+tuple);
     results.add((Integer) tuple.getValue(0));
   }
 
