@@ -54,10 +54,13 @@ public class RandomIntegerSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        Utils.sleep(1000);
+        Utils.sleep(10);
         if (mycount<=100){
             collector.emit(new Values(1, System.currentTimeMillis() , ++msgId), msgId);
             mycount++;
+        }
+        if(mycount==100){
+            System.out.println("emit finished");
         }
 
     }
