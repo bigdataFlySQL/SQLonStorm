@@ -8,11 +8,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import definetable.Global;
+import definetable.MField;
 import definetable.MTable;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -32,6 +34,8 @@ public class StreamDataReaderSpout extends BaseRichSpout {
     private FileReader fileReader;
     private boolean completed = false;
     private ParsingSQL parsingSQL;
+    private List<String> descOfOutputFileds;
+
 
     public void ack(Object msgId) {
         System.out.println("OK:" + msgId);
@@ -120,11 +124,6 @@ public class StreamDataReaderSpout extends BaseRichSpout {
                      SpoutOutputCollector collector) {
         try {
 
-            //region   载入表结构
-                Global.loadingDataStructure("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/java/definetable/createtabledata.txt");
-                //测试是否载入成功
-            HashMap<String, MTable> dataBase=  Global.DataBase;
-            //endregion
             this.fileReader = new FileReader(conf.get("InputSQL").toString());
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String sql = "";
@@ -163,9 +162,30 @@ public class StreamDataReaderSpout extends BaseRichSpout {
 
 
     /**
-     * Declare the output field "word"
+     * spout 的 output fields 为 表的列名String集合
      */
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("line"));
+
+        try{
+            //region   载入表结构
+            Global.loadingDataStructure("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/java/definetable/createtabledata.txt");
+            //测试是否载入成功,并获取表的列名
+            HashMap<String, MTable> dataBase=  Global.DataBase;
+            MTable jData_Action_201602 = dataBase.get("JData_Action_201602");
+            this.descOfOutputFileds = new ArrayList<String>();
+            for (MField mField: jData_Action_201602.getField()){
+                //获取表的列名，作为spout 的 output fields
+                this.descOfOutputFileds.add(mField.getName());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+        //endregion
+        Fields fields = new Fields(this.descOfOutputFileds);
+        declarer.declare(fields);
+
     }
 }

@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,22 @@ public class WordNormalizer extends BaseBasicBolt {
     private FileReader fileReader;
 
     public void prepare(Map stormConf, TopologyContext context) {
+        // 获取StreamSataReaderSpout 传过来的每一行数据的属性信息 如 user_id,sku_id,cate
+        Map<String, Map<String, List<String>>> inputFields = context.getThisInputFields();
+        Iterator<String> iter = inputFields.keySet().iterator();
+        while (iter.hasNext()){
+            String key = iter.next();
+            Map<String,List<String >> val = inputFields.get(key);
+            Iterator<String> iter2 = val.keySet().iterator();
+            while (iter2.hasNext()){
+               List<String> valList = val.get(iter2.next());
+               for (String item:valList){
+                   System.out.println(item);
+               }
+            }
+
+        }
+
         results = new ArrayList<String>();
 //        String sql = null;
 //        try {
@@ -38,6 +55,11 @@ public class WordNormalizer extends BaseBasicBolt {
 //            String[] sqlItems=sql.split("where");
 //
 //        }
+    }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+        return super.getComponentConfiguration();
     }
 
     public void cleanup() {
