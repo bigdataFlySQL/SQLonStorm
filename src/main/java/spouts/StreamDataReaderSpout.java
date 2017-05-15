@@ -8,9 +8,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import definetable.Global;
+import definetable.MTable;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -116,6 +119,12 @@ public class StreamDataReaderSpout extends BaseRichSpout {
     public void open(Map conf, TopologyContext context,
                      SpoutOutputCollector collector) {
         try {
+
+            //region   载入表结构
+                Global.loadingDataStructure("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/java/definetable/createtabledata.txt");
+                //测试是否载入成功
+            HashMap<String, MTable> dataBase=  Global.DataBase;
+            //endregion
             this.fileReader = new FileReader(conf.get("InputSQL").toString());
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String sql = "";

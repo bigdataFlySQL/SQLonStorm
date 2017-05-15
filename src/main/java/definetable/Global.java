@@ -63,9 +63,9 @@ public class Global {
 
     }
 
-    public static void main(String[] args) throws IOException,JSQLParserException{
+    public static void loadingDataStructure(String dsPath) throws IOException,JSQLParserException{
         Global configurationFileWrite = new Global();
-        configurationFileWrite.setConfigurationdata(args[0]);
+        configurationFileWrite.setConfigurationdata(dsPath);
 
         try {
 
