@@ -97,6 +97,8 @@ public class StreamDataReaderSpout extends BaseRichSpout {
             while (rs.next()) {
 
                 Values emitVal = new Values();
+                //输出第一项为表名
+                emitVal.add("JData_Action_201602");
                 emitVal.add(rs.getString(1));
                 emitVal.add(rs.getString(2));
                 emitVal.add(rs.getString(3));
@@ -128,7 +130,8 @@ public class StreamDataReaderSpout extends BaseRichSpout {
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String sql = "";
             parsingSQL = new ParsingSQL();
-            while ((sql = bufferedReader.readLine()) != null) {
+            boolean flag=true;
+            while (flag && (sql = bufferedReader.readLine()) != null ) {
                 // 读取sql ,解析sql
                 System.out.println(sql);
                 parsingSQL.testparsingTheSQL(sql);
@@ -149,9 +152,13 @@ public class StreamDataReaderSpout extends BaseRichSpout {
                 System.out.println(AggregationStream.havingList.size());
                 List<TCItem> th = AggregationStream.havingList;
                 // endregion
+                //只读取一条sql语句
+                flag=false;
             }
+            bufferedReader.close();
+            this.fileReader.close();
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("Error reading file [" + conf.get("wordFile") + "]");
+            throw new RuntimeException("Error reading file ");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -173,6 +180,8 @@ public class StreamDataReaderSpout extends BaseRichSpout {
             HashMap<String, MTable> dataBase=  Global.DataBase;
             MTable jData_Action_201602 = dataBase.get("JData_Action_201602");
             this.descOfOutputFileds = new ArrayList<String>();
+            //输出第0项为表名
+            this.descOfOutputFileds.add("Table");
             for (MField mField: jData_Action_201602.getField()){
                 //获取表的列名，作为spout 的 output fields
                 this.descOfOutputFileds.add(mField.getName());

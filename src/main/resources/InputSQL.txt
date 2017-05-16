@@ -1,3 +1,8 @@
+SELECT * FROM JData_Action_201602 where JData_Action_201602.sku_id=138778 and JData_Action_201602.type=6 or JData_Action_201602.type=1 and JData_Action_201602.user_id=200719;
+
+SELECT * FROM JData_Action_201602 where JData_Action_201602.sku_id=138778 and JData_Action_201602.type=1;
+SELECT * FROM JData_Action_201602 where JData_Action_201602.type=1 and JData_Action_201602.cate=8;
+
 SELECT * FROM JData_Product where JData_Product.attr2>2 group by JData_Product.sku_id having JData_Product.sku_id <100
 SELECT sku_id,MAX(attr1) as a,attr1,JData_Product.attr2 FROM JData_Product
 SELECT * FROM JData_Product where JData_Product.sku_id > 10000 and JData_Product.attr1>2 LIMIT 1000
