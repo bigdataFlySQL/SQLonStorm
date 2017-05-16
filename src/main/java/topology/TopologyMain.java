@@ -6,7 +6,7 @@ import org.apache.storm.topology.TopologyBuilder;
 import spouts.StreamDataReaderSpout;
 
 
-import bolts.WordNormalizer;
+import bolts.SelectBolt;
 
 
 public class TopologyMain {
@@ -15,7 +15,7 @@ public class TopologyMain {
         //Topology definition
 		TopologyBuilder builder = new TopologyBuilder();
 		builder.setSpout("data-reader",new StreamDataReaderSpout());
-		builder.setBolt("word-normalizer", new WordNormalizer())
+		builder.setBolt("word-normalizer", new SelectBolt())
 			.shuffleGrouping("data-reader");
 //		builder.setBolt("word-counter", new WordCounter(),2)
 //				.shuffleGrouping("word-normalizer");
