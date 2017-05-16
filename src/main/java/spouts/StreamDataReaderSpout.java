@@ -93,19 +93,19 @@ public class StreamDataReaderSpout extends BaseRichSpout {
             ResultSet rs = statement.executeQuery(sql);
             System.out.println("-----------------");
 
-            String name = null;
+            int msgid=1;
             while (rs.next()) {
-                String tempStr = "";
-                tempStr += rs.getInt("user_id") + "|";
 
-                tempStr += rs.getInt("sku_id") + "|";
+                Values emitVal = new Values();
+                emitVal.add(rs.getString(1));
+                emitVal.add(rs.getString(2));
+                emitVal.add(rs.getString(3));
+                emitVal.add(rs.getString(4));
+                emitVal.add(rs.getString(5));
+                emitVal.add(rs.getString(6));
+                emitVal.add(rs.getString(7));
 
-//                System.out.println(rs.getInt("sku_id"));
-                tempStr += rs.getInt("type") + "|";
-                tempStr += rs.getInt("cate")+"|";
-                tempStr += rs.getInt("brand");
-                System.out.println(tempStr);
-                this.collector.emit(new Values(tempStr), tempStr);
+                this.collector.emit(emitVal, msgid++);
             }
 
             conn.close();
@@ -168,7 +168,7 @@ public class StreamDataReaderSpout extends BaseRichSpout {
 
         try{
             //region   载入表结构
-            Global.loadingDataStructure("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/java/definetable/createtabledata.txt");
+            Global.loadingDataStructure("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/createtabledata.txt");
             //测试是否载入成功,并获取表的列名
             HashMap<String, MTable> dataBase=  Global.DataBase;
             MTable jData_Action_201602 = dataBase.get("JData_Action_201602");
