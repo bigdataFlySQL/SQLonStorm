@@ -70,7 +70,7 @@ public class StreamDataReaderSpout extends BaseRichSpout {
         // 执行数据库操作之前要在数据库管理系统上创建一个数据库，名字自己定，
         // 下面语句之前就要先创建javademo数据库
         String url = "jdbc:mysql://localhost:3306/jingdongdata?"
-                + "user=root&password=12211104&useUnicode=true&characterEncoding=UTF8";
+                + "user=root&password=yao2376098&useUnicode=true&characterEncoding=UTF8";
 
         try {
             Connection conn = null;
@@ -175,7 +175,7 @@ public class StreamDataReaderSpout extends BaseRichSpout {
 
         try{
             //region   载入表结构
-            Global.loadingDataStructure("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/createtabledata.txt");
+            Global.loadingDataStructure("/home/yao/intellij_IDE/work_space/SQLonStorm/src/main/resources/createtabledata.txt");
             //测试是否载入成功,并获取表的列名
             HashMap<String, MTable> dataBase=  Global.DataBase;
             MTable jData_Action_201602 = dataBase.get("JData_Action_201602");
