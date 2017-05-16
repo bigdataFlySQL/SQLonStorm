@@ -16,6 +16,7 @@ public class BinaryTreeAnrOrNode {
     public boolean isAndExp; //and
     public boolean isOrExp;  // or
     public boolean isLeave; // 是否是叶子节点
+    public boolean val; // 节点值，为布尔变量
 
     public TCItem getMcItem() {
         return mcItem;
