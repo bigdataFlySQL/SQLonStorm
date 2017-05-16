@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
@@ -373,6 +374,7 @@ public class ParsingSQL extends TestCase {
             explain(root, exp);
         } else {
             if (exp instanceof AndExpression) {
+                // and
                 AndExpression newexp = (AndExpression) exp;
                 root.isAndExp = true;
                 root.left = new BinaryTreeAnrOrNode();
@@ -380,13 +382,21 @@ public class ParsingSQL extends TestCase {
                 solveAndOr(newexp.getLeftExpression(), true, root.left);
                 solveAndOr(newexp.getRightExpression(), true, root.right);
             } else if (exp instanceof OrExpression) {
+                // or
                 OrExpression newexp = (OrExpression) exp;
                 root.isOrExp = true;
                 root.left = new BinaryTreeAnrOrNode();
                 root.right = new BinaryTreeAnrOrNode();
                 solveAndOr(newexp.getLeftExpression(), true, root.left);
                 solveAndOr(newexp.getRightExpression(), true, root.right);
-            } else {
+            } else if (exp instanceof Parenthesis){
+                // ()
+                Parenthesis parenthesis = (Parenthesis)exp;
+                // 获取去掉括号之后的表达式
+                Expression insideEx = parenthesis.getExpression();
+                solveAndOr(insideEx,true,root);
+            }
+            else {
 
                 solveAndOr(exp, false, root);
             }
