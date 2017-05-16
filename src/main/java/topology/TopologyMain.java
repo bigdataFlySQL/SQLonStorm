@@ -24,7 +24,6 @@ public class TopologyMain {
 		
         //Configuration
 		Config conf = new Config();
-		conf.put("InputSQL", args[0]);
 		conf.setDebug(false);
         //Topology run
 		conf.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);

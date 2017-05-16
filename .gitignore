@@ -1,6 +1,7 @@
 .idea
-*.class
 
+*.class
+/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/java/domain/ProjectConfig.java
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
