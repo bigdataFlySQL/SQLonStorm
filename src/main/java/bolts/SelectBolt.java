@@ -8,6 +8,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 
 import java.util.*;
@@ -22,6 +23,15 @@ public class SelectBolt extends BaseBasicBolt {
     // 记录选择操作中间处理结果
     private List<String> results;
 
+    private List<String> descOfOutputFileds;
+
+    public List<String> getDescOfOutputFileds() {
+        return descOfOutputFileds;
+    }
+
+    public void setDescOfOutputFileds(List<String> descOfOutputFileds) {
+        this.descOfOutputFileds = descOfOutputFileds;
+    }
 
     public void prepare(Map stormConf, TopologyContext context) {
 
@@ -64,13 +74,7 @@ public class SelectBolt extends BaseBasicBolt {
         BinaryTreeAndOr bTreeAndOr = Selection.binaryTreeAndOr;
         if (bTreeAndOr != null) {
             postorderTraversal(bTreeAndOr.root, input);
-//            String curType = (String) input.getValueByField("type");
-//            //选择商品类型为8的数据
-//            if (Integer.valueOf(input.getString(5)) == 8) {
-//                String ansStr = "";
-//                for (int i = 0; i < input.size(); i++) {
-//                    ansStr += input.getString(i) + ",";
-//                }
+
             if (bTreeAndOr.root.val) {
                 // 该条tuple符合选择需求
                 String ansStr = "";
@@ -78,10 +82,13 @@ public class SelectBolt extends BaseBasicBolt {
                     ansStr += input.getString(i) + ",";
                 }
                 results.add(ansStr);
+
+                collector.emit(input.getValues());
             }
-//            }
+
         } else {
             // 无SQL 选择操作需求，tuple直接流入下一个bolt
+            collector.emit(input.getValues());
         }
     }
 
@@ -156,9 +163,11 @@ public class SelectBolt extends BaseBasicBolt {
 
 
     /**
-     * 输出元组数据到下一个bolt
+     * 输出元组数据属性名到下一个bolt
      */
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        Fields fields = new Fields(this.descOfOutputFileds);
+        declarer.declare(fields);
     }
 
 }
