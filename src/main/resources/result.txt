@@ -1,4 +1,4 @@
 映射的结果
-JData_Action_201602.type| count(JData_Action_201602.sku_id)| 
-1,5
-6,5
+JData_Action_201602.user_id| max(JData_Action_201602.brand)| 
+266079,403
+283139,375
