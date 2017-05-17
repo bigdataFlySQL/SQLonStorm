@@ -1,4 +1,4 @@
-SELECT JData_Action_201602.sku_id FROM JData_Action_201602 where (JData_Action_201602.cate=8 or JData_Action_201602.sku_id=61226) and (JData_Action_201602.type=1 or JData_Action_201602.type=2);
+select   JData_Action_201602.sku_id, count(JData_Action_201602.brand) as bc from JData_Action_201602  group by JData_Action_201602.sku_id;
 SELECT * FROM JData_Action_201602 where JData_Action_201602.cate=8 and (JData_Action_201602.type=1 or JData_Action_201602.type=2);
 SELECT * FROM JData_Action_201602 where JData_Action_201602.sku_id=138778 and JData_Action_201602.type=6 or JData_Action_201602.type=1 and JData_Action_201602.user_id=200719;
 
