@@ -90,7 +90,9 @@ public class ParsingSQL extends TestCase {
                     //region //聚合操作提取,目前仅支持max 和 count 操作
                     Function fun = (Function) expr;
                     System.out.println(fun.getName());
+                    String funFullName = fun.toString();
                     AgregationFunFactor funFactor = new AgregationFunFactor();
+                    funFactor.setFunFullName(funFullName);//设置聚合函数全名
                     funFactor.setFunStr(fun.getName()); //提取函数名
 
                     String tTabName = fromTables.get(0).toString();
