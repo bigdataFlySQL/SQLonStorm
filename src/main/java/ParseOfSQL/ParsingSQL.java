@@ -432,9 +432,14 @@ public class ParsingSQL extends TestCase {
             if (havExp instanceof GreaterThan) {
                 // having tabl.a > 100
                 GreaterThan gt = (GreaterThan) havExp;
-                Column column = (Column) gt.getLeftExpression();
-                tcItem.setColName(column.getColumnName());
-                tcItem.setColName(column.getTable().getName());
+                if (gt.getLeftExpression() instanceof  Column){
+                    Column column = (Column) gt.getLeftExpression();
+                    tcItem.setColName(column.getColumnName());
+                    tcItem.setTableName(column.getTable().getName());
+                }else{
+                    tcItem.setColName(gt.getLeftExpression().toString());
+                }
+
                 tcItem.setComparator(">");
                 tcItem.setComIntVal(Integer.valueOf(gt.getRightExpression().toString()));
                 AggregationStream.havingList.add(tcItem);
@@ -442,9 +447,13 @@ public class ParsingSQL extends TestCase {
             } else if (havExp instanceof GreaterThanEquals) {
                 // having tabl.a >= 100
                 GreaterThanEquals gte = (GreaterThanEquals) havExp;
-                Column column = (Column) gte.getLeftExpression();
-                tcItem.setColName(column.getColumnName());
-                tcItem.setColName(column.getTable().getName());
+                if (gte.getLeftExpression() instanceof  Column){
+                    Column column = (Column) gte.getLeftExpression();
+                    tcItem.setColName(column.getColumnName());
+                    tcItem.setTableName(column.getTable().getName());
+                }else{
+                    tcItem.setColName(gte.getLeftExpression().toString());
+                }
                 tcItem.setComparator(">=");
                 tcItem.setComIntVal(Integer.valueOf(gte.getRightExpression().toString()));
                 AggregationStream.havingList.add(tcItem);
@@ -452,9 +461,13 @@ public class ParsingSQL extends TestCase {
             } else if (havExp instanceof MinorThan) {
                 // having tabl.a < 100
                 MinorThan mt = (MinorThan) havExp;
-                Column column = (Column) mt.getLeftExpression();
-                tcItem.setColName(column.getColumnName());
-                tcItem.setColName(column.getTable().getName());
+                if (mt.getLeftExpression() instanceof  Column){
+                    Column column = (Column) mt.getLeftExpression();
+                    tcItem.setColName(column.getColumnName());
+                    tcItem.setTableName(column.getTable().getName());
+                }else{
+                    tcItem.setColName(mt.getLeftExpression().toString());
+                }
                 tcItem.setComparator("<");
                 tcItem.setComIntVal(Integer.valueOf(mt.getRightExpression().toString()));
                 AggregationStream.havingList.add(tcItem);
@@ -462,9 +475,13 @@ public class ParsingSQL extends TestCase {
             } else if (havExp instanceof MinorThanEquals) {
                 // having tabl.a <= 100
                 MinorThanEquals mte = (MinorThanEquals) havExp;
-                Column column = (Column) mte.getLeftExpression();
-                tcItem.setColName(column.getColumnName());
-                tcItem.setColName(column.getTable().getName());
+                if (mte.getLeftExpression() instanceof  Column){
+                    Column column = (Column) mte.getLeftExpression();
+                    tcItem.setColName(column.getColumnName());
+                    tcItem.setTableName(column.getTable().getName());
+                }else{
+                    tcItem.setColName(mte.getLeftExpression().toString());
+                }
                 tcItem.setComparator("<=");
                 tcItem.setComIntVal(Integer.valueOf(mte.getRightExpression().toString()));
                 AggregationStream.havingList.add(tcItem);
@@ -472,9 +489,13 @@ public class ParsingSQL extends TestCase {
             } else if (havExp instanceof NotEqualsTo) {
                 // having tabl.a != 100
                 NotEqualsTo net = (NotEqualsTo) havExp;
-                Column column = (Column) net.getLeftExpression();
-                tcItem.setColName(column.getColumnName());
-                tcItem.setColName(column.getTable().getName());
+                if (net.getLeftExpression() instanceof  Column){
+                    Column column = (Column) net.getLeftExpression();
+                    tcItem.setColName(column.getColumnName());
+                    tcItem.setTableName(column.getTable().getName());
+                }else{
+                    tcItem.setColName(net.getLeftExpression().toString());
+                }
                 tcItem.setComparator("!=");
                 tcItem.setComIntVal(Integer.valueOf(net.getRightExpression().toString()));
                 AggregationStream.havingList.add(tcItem);
@@ -483,9 +504,13 @@ public class ParsingSQL extends TestCase {
             } else if (havExp instanceof EqualsTo) {
                 // having tabl.a = 100
                 EqualsTo et = (EqualsTo) havExp;
-                Column column = (Column) et.getLeftExpression();
-                tcItem.setColName(column.getColumnName());
-                tcItem.setColName(column.getTable().getName());
+                if (et.getLeftExpression() instanceof  Column){
+                    Column column = (Column) et.getLeftExpression();
+                    tcItem.setColName(column.getColumnName());
+                    tcItem.setTableName(column.getTable().getName());
+                }else{
+                    tcItem.setColName(et.getLeftExpression().toString());
+                }
                 tcItem.setComparator("!=");
                 tcItem.setComIntVal(Integer.valueOf(et.getRightExpression().toString()));
                 AggregationStream.havingList.add(tcItem);
