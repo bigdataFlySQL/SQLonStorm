@@ -86,7 +86,8 @@ public class ParsingSQL extends TestCase {
                     // 加入到本条SQL语句的映射的列集合
                     Projection.proList.add(tcItem);
 
-                } else if (expr instanceof Function) { //聚合操作提取,目前仅支持max 和 count 操作
+                } else if (expr instanceof Function) {
+                    //region //聚合操作提取,目前仅支持max 和 count 操作
                     Function fun = (Function) expr;
                     System.out.println(fun.getName());
                     AgregationFunFactor funFactor = new AgregationFunFactor();
@@ -98,7 +99,7 @@ public class ParsingSQL extends TestCase {
                     for (Expression exItem : expressionList) {//提取参数
                         Column paraColumn = (Column) exItem;
                         TCItem tcItem = new TCItem();
-                        tcItem.setColName(paraColumn.toString());
+                        tcItem.setColName(paraColumn.getColumnName());
                         if (paraColumn.getTable().getName() == null) {
                             tcItem.setTableName(tTabName);
                         } else {
@@ -110,7 +111,7 @@ public class ParsingSQL extends TestCase {
                     funFactor.setParameterList(tcItemList);
 
                     AggregationStream.agreFunList.add(funFactor);
-
+                    //endregion
                 }
 
             }
