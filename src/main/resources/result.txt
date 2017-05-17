@@ -1,5 +1,5 @@
 映射的结果
-JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| 
+JData_Action_201602.sku_id| count(JData_Action_201602.type)| 
 137328,1
 72348,1
 138778,2
