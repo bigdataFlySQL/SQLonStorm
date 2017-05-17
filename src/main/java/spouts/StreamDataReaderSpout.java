@@ -16,6 +16,7 @@ import java.util.Map;
 import definetable.Global;
 import definetable.MField;
 import definetable.MTable;
+import domain.ProjectConfig;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -36,6 +37,13 @@ public class StreamDataReaderSpout extends BaseRichSpout {
     private ParsingSQL parsingSQL;
     private List<String> descOfOutputFileds;
 
+    public List<String> getDescOfOutputFileds() {
+        return descOfOutputFileds;
+    }
+
+    public void setDescOfOutputFileds(List<String> descOfOutputFileds) {
+        this.descOfOutputFileds = descOfOutputFileds;
+    }
 
     public void ack(Object msgId) {
         System.out.println("OK:" + msgId);
@@ -70,7 +78,7 @@ public class StreamDataReaderSpout extends BaseRichSpout {
         // 执行数据库操作之前要在数据库管理系统上创建一个数据库，名字自己定，
         // 下面语句之前就要先创建javademo数据库
         String url = "jdbc:mysql://localhost:3306/jingdongdata?"
-                + "user=root&password=yao2376098&useUnicode=true&characterEncoding=UTF8";
+                + "user=" + ProjectConfig.mySQL_user + "&password=" + ProjectConfig.mySQL_passwd + "&useUnicode=true&characterEncoding=UTF8";
 
         try {
             Connection conn = null;
@@ -93,7 +101,7 @@ public class StreamDataReaderSpout extends BaseRichSpout {
             ResultSet rs = statement.executeQuery(sql);
             System.out.println("-----------------");
 
-            int msgid=1;
+            int msgid = 1;
             while (rs.next()) {
 
                 Values emitVal = new Values();
@@ -124,46 +132,6 @@ public class StreamDataReaderSpout extends BaseRichSpout {
      */
     public void open(Map conf, TopologyContext context,
                      SpoutOutputCollector collector) {
-        try {
-
-            this.fileReader = new FileReader(conf.get("InputSQL").toString());
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String sql = "";
-            parsingSQL = new ParsingSQL();
-            boolean flag=true;
-            while (flag && (sql = bufferedReader.readLine()) != null ) {
-                // 读取sql ,解析sql
-                System.out.println(sql);
-                parsingSQL.testparsingTheSQL(sql);
-
-                //region 测试SQL 语义是否解析成功
-                System.out.println(Selection.binaryTreeAndOr == null);
-                BinaryTreeAndOr binaryTreeAndOr = Selection.binaryTreeAndOr;
-                System.out.println(Projection.proList.size());
-                List<TCItem> tp = Projection.proList;
-                System.out.println(Selection.fromTableList.size());
-                List<String> ft= Selection.fromTableList;
-                System.out.println(JoinCondition.linkTablemap.size());
-                Map<String,JoinTwoTable> tj = JoinCondition.linkTablemap;
-                System.out.print(GroupBy.groupList.size());
-                List<TCItem> tg = GroupBy.groupList;
-                System.out.println(AggregationStream.agreFunList.size());
-                List<AgregationFunFactor> ag = AggregationStream.agreFunList;
-                System.out.println(AggregationStream.havingList.size());
-                List<TCItem> th = AggregationStream.havingList;
-                // endregion
-                //只读取一条sql语句
-                flag=false;
-            }
-            bufferedReader.close();
-            this.fileReader.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("Error reading file ");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         this.collector = collector;
     }
 
@@ -173,26 +141,6 @@ public class StreamDataReaderSpout extends BaseRichSpout {
      */
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
 
-        try{
-            //region   载入表结构
-            Global.loadingDataStructure("/home/yao/intellij_IDE/work_space/SQLonStorm/src/main/resources/createtabledata.txt");
-            //测试是否载入成功,并获取表的列名
-            HashMap<String, MTable> dataBase=  Global.DataBase;
-            MTable jData_Action_201602 = dataBase.get("JData_Action_201602");
-            this.descOfOutputFileds = new ArrayList<String>();
-            //输出第0项为表名
-            this.descOfOutputFileds.add("Table");
-            for (MField mField: jData_Action_201602.getField()){
-                //获取表的列名，作为spout 的 output fields
-                this.descOfOutputFileds.add(mField.getName());
-            }
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-
-        //endregion
         Fields fields = new Fields(this.descOfOutputFileds);
         declarer.declare(fields);
 

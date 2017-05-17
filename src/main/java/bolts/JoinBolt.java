@@ -29,7 +29,7 @@ public class JoinBolt extends BaseWindowedBolt {
     List<String> results;
 //    List<>
     private OutputCollector collector;
-    protected JoinBolt() {
+    public JoinBolt() {
         super();
     }
 
@@ -58,66 +58,131 @@ public class JoinBolt extends BaseWindowedBolt {
         List<Tuple> tuplesInWindow = tupleWindow.get();
         List<Tuple> newTuples = tupleWindow.getNew();
         List<Tuple> expiredTuples = tupleWindow.getExpired();
+
         LOG.debug("Events in current window: " + tuplesInWindow.size());
         if(expiredTuples.size() > 0){
             System.out.println(newTuples.size());
             System.out.println(expiredTuples.size());
         }
-        String OriginTabName = JoinCondition.originTabName;
-        String JoinTabName = "";
+
+        String OriginTabName = JoinCondition.originTabName;  // 获取被连接表表名
+        String JoinTabName = "";  // 获取连接表表名
         Iterator<String> iterator = JoinCondition.linkTablemap.keySet().iterator();
-        String JoinOP = "";
-        String compareCol = "";
+        String JoinOP = "";  // join的方式，是Left，Right或者Inner
+        String compareCol = ""; // 获取连接的条件，如JData_Action_201602.sku_id = JData_Action_201603.sku_id，则该项为sku_id
         while (iterator.hasNext()){
             String A = iterator.next();
-            JoinTabName = A.split("_")[0];
-            JoinOP = A.split("_")[1];
+            JoinTabName = A.split("\\|")[0];
+            JoinOP = A.split("\\|")[1];
             compareCol = JoinCondition.linkTablemap.get(A).getTcItemRight().getColName();
+//            results.add("hello world1");
+            System.out.println(A + "  " +OriginTabName+ "  " + JoinTabName + "  "+ JoinOP+ "  " + compareCol);
         }
         for(Tuple tuple: newTuples){
-            if(tuple.getValue(0) == OriginTabName){
+            System.out.println(tuple.getValue(0));
+            if(tuple.getValue(0).toString().equals(OriginTabName)){
                 List_originTab.add(tuple);
+
             }
-            else if(tuple.getValue(0) == JoinTabName){
+            else if(tuple.getValue(0).toString().equals(JoinTabName)){
                 List_joinTab.add(tuple);
+
             }
         }
-        boolean flag = false;
-        if(JoinOP == "LEFT JOIN"){
-            for(int i = 0;i<List_originTab.size();i++){
-                for(int j = 0;j<List_joinTab.size();j++){
-                    String B = "";
-                    if(List_joinTab.get(j).getValueByField(compareCol) == List_originTab.get(i).getValueByField(compareCol)){
-                        for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
-                            B += List_originTab.get(i).getString(ii) + ",";
-                        }
-                        for(int jj = 0;jj < List_joinTab.get(j).size();jj++ ){
-                            B += List_joinTab.get(j).getString(jj) + ",";
-                        }
-                        List_joinTab.remove(j);
-                        results.add(B);
-                        flag = true;
-                        break;
-                    }
+//        results.add("hello world2");
 
-                }
-                if(flag == false){
-                    String B = "";
+        boolean flag = false;
+        if(JoinOP.equals("Left")) {
+            Left_Join(compareCol);
+        }
+        else if(JoinOP.equals("Right")){
+            Right_Join(compareCol);
+        }
+    }
+
+    public void Left_Join(String compareCol){
+        boolean flag = false;
+        for(int i = 0;i<List_originTab.size();i++){
+            for(int j = 0;j<List_joinTab.size();j++){
+                String B = "";
+                if(List_joinTab.get(j).getValueByField(compareCol).equals(List_originTab.get(i).getValueByField(compareCol))){
                     for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
-                        B += List_originTab.get(i).getString(ii) + ",";
+                        if(ii == 0)
+                            B += List_originTab.get(i).getString(ii) + ",";
+                        else
+                            B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
+                    }
+                    for(int jj = 1;jj < List_joinTab.get(j).size();jj++ ){
+                        B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj) + ",";
                     }
                     results.add(B);
-                }else {
-                    flag = false;
+                    flag = true;
                 }
+
+            }
+            if(flag == false){
+                String B = "";
+                for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
+                    if(ii == 0)
+                        B += List_originTab.get(i).getString(ii) + ",";
+                    else
+                        B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
+                }
+                results.add(B);
+            }else {
+                flag = false;
             }
         }
+    }
 
+    public void Right_Join(String compareCol){
+        boolean flag = false;
+        for(int i = 0;i<List_joinTab.size();i++){
+            for(int j = 0;j<List_originTab.size();j++){
+                String B = "";
+                if(List_originTab.get(j).getValueByField(compareCol).equals(List_joinTab.get(i).getValueByField(compareCol))){
+                    for(int ii = 0;ii < List_joinTab.get(i).size();ii++ ){
+                        if(ii == 0)
+                            B += List_originTab.get(j).getString(0) + ",";
+                        else
+                            B += List_joinTab.get(i).getString(0) + "." + List_joinTab.get(i).getString(ii) + ",";
+                    }
+                    for(int jj = 1;jj < List_originTab.get(j).size();jj++ ){
+                        B += List_originTab.get(j).getString(0) + "." + List_originTab.get(j).getString(jj) + ",";
+                    }
+                    results.add(B);
+                    flag = true;
+                }
+
+            }
+            if(flag == false){
+                String B = "";
+                for(int ii = 0;ii < List_joinTab.get(i).size();ii++ ){
+                    if(ii==0){
+                        B += List_originTab.get(0).getString(0);
+                    }
+
+                    else {
+                        B += List_joinTab.get(i).getString(ii) + "." + List_joinTab.get(i).getString(ii) + ",";
+                    }
+                }
+                results.add(B);
+            }else {
+                flag = false;
+            }
+        }
     }
 
     @Override
     public void cleanup() {
+
+        System.out.println("打印结果");
+        for(String item : results){
+            System.out.println(item);
+            System.out.println("---------------------------------------------");
+        }
         super.cleanup();
+
     }
 
     @Override

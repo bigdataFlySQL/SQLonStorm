@@ -41,6 +41,7 @@ public class JoinSpouttest_1 extends BaseRichSpout {
         try {
             this.fileReader = new FileReader(conf.get("InputSQL").toString());
             BufferedReader bufferedReader = new BufferedReader(fileReader);
+            parsingSQL = new ParsingSQL();
             String sql = "";
             boolean flag = true;
 
@@ -101,9 +102,9 @@ public class JoinSpouttest_1 extends BaseRichSpout {
             System.out.println("成功加载MySQL驱动程序");
             conn = DriverManager.getConnection(url);
             Statement statement = conn.createStatement();
-            String sql = "SELECT * FROM JData_Action_201602 LIMIT 0, 20";
+            String sql = "SELECT * FROM JData_Action_201602 LIMIT 0, 10";
             ResultSet rs = statement.executeQuery(sql);
-            System.out.println("----------------");
+
 
             int msgid = 1;
             while (rs.next()){
@@ -121,6 +122,7 @@ public class JoinSpouttest_1 extends BaseRichSpout {
                 this.collector.emit(emitVal, msgid++);
 
             }
+
             conn.close();
         }catch (Exception e){
             throw new RuntimeException("Error reading tuple", e);
