@@ -105,6 +105,7 @@ public class TopologyMain {
             //映射
             ProjectionBolt projectionBolt = new ProjectionBolt(ProjectConfig.projection_result_file_path);
 
+
 //		builder.setBolt("word-counter", new WordCounter(),2)
 //				.shuffleGrouping("word-normalizer");
 //		builder.setBolt("word-counter", new WordCounter(),2)
@@ -114,8 +115,10 @@ public class TopologyMain {
             TopologyBuilder builder = new TopologyBuilder();
             builder.setSpout("data-reader", sDataSpout);
             builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
-            builder.setBolt("groupby",groupByBolt).shuffleGrouping("select");
-            builder.setBolt("projection", projectionBolt).shuffleGrouping("groupby");
+            builder.setBolt("group-by",groupByBolt).shuffleGrouping("select");
+            builder.setBolt("having", havingBolt).shuffleGrouping("group-by");
+            builder.setBolt("projection", projectionBolt).shuffleGrouping("having");
+
             //Configuration
             Config conf = new Config();
             conf.setDebug(false);

@@ -6,7 +6,7 @@ package operation;
  */
 public class TCItem {
 
-    private String tableName;//表名
+    private String tableName;//表名 表名若为null，则colName 为聚合的属性名 如count(tab1.A)
     private String colName;//属性名   特别情况 * 表示选择全部列
     private boolean isCompare; //是否参与比较
     private String comparator;// 比较符号 >,<,=,!=

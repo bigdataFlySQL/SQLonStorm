@@ -1,8 +1,4 @@
 映射的结果
-JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| JData_Action_201602.sku_id| count(JData_Action_201602.type)| 
-137328,1
-72348,1
-138778,2
-61226,2
-103126,3
-4732,1
+JData_Action_201602.user_id| JData_Action_201602.sku_id| JData_Action_201602.time| 
+266079,138778,2016-01-31 23:59:02,
+266079,138778,2016-01-31 23:59:03,

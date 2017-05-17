@@ -30,8 +30,10 @@ public class ProjectionBolt extends BaseBasicBolt {
 
     private List<String> descOfOutputFileds;
     private String filePath;
+    private boolean flag=true;
 
-   public ProjectionBolt(String filePath){
+
+    public ProjectionBolt(String filePath){
        this.filePath = filePath;
    }
 
@@ -62,7 +64,9 @@ public class ProjectionBolt extends BaseBasicBolt {
     @Override
     public void cleanup() {
         super.cleanup();
+
         try {
+            // 最后的映射结果
             FileWriter fileWriter = new FileWriter(this.filePath);
             BufferedWriter bw = new BufferedWriter(fileWriter);
             bw.write("映射的结果\n");
@@ -79,15 +83,6 @@ public class ProjectionBolt extends BaseBasicBolt {
         }catch (IOException e){
             e.printStackTrace();
         }
-        // 最后的映射结果
-        System.out.println("映射的结果");
-        for (String item: this.descOfOutputFileds){
-            System.out.print(item+"| ");
-        }
-        System.out.println();
-        for (String item : results) {
-            System.out.println(item);
-        }
     }
 
     @Override
@@ -98,7 +93,6 @@ public class ProjectionBolt extends BaseBasicBolt {
         StringBuffer sb = new StringBuffer();
         if (!proList.isEmpty()) {
             // SQL 有映射语义
-            boolean flag=true;
             for (TCItem tcItem : proList) {
                 //先处理选择全部的特殊语义
                 if (tcItem.getColName().equals("*")) {
@@ -117,16 +111,19 @@ public class ProjectionBolt extends BaseBasicBolt {
                     String getTargetVal = tuple.getStringByField(tcItem.getColName()) + ",";
                     sb.append(getTargetVal);
                 }
-                flag = false;
             }
+
         }
 
         // 处理聚合映射
         for (AgregationFunFactor funFactor : AggregationStream.agreFunList) {
-            this.descOfOutputFileds.add(funFactor.getFunFullName());
+            if(flag){
+                this.descOfOutputFileds.add(funFactor.getFunFullName());
+            }
             sb.append(tuple.getStringByField(funFactor.getFunFullName()));
         }
 
+        flag=false;// 保证 descOfOutputFileds 只获取一次输出属性名
         if (!sb.toString().isEmpty()) {
             this.results.add(sb.toString());
         }
