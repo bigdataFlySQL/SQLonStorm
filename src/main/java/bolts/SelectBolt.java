@@ -37,21 +37,21 @@ public class SelectBolt extends BaseBasicBolt {
 
         results = new ArrayList<>();
 
-        // 获取StreamSataReaderSpout 传过来的每一行数据的属性信息 如 user_id,sku_id,cate
-        Map<String, Map<String, List<String>>> inputFields = context.getThisInputFields();
-        Iterator<String> iter = inputFields.keySet().iterator();
-        while (iter.hasNext()) {
-            String key = iter.next();
-            Map<String, List<String>> val = inputFields.get(key);
-            Iterator<String> iter2 = val.keySet().iterator();
-            while (iter2.hasNext()) {
-                inputvalueNameList = val.get(iter2.next());
-                for (String item : inputvalueNameList) {
-                    System.out.println(item);
-                }
-            }
+//        // 获取StreamSataReaderSpout 传过来的每一行数据的属性信息 如 user_id,sku_id,cate
+//        Map<String, Map<String, List<String>>> inputFields = context.getThisInputFields();
+//        Iterator<String> iter = inputFields.keySet().iterator();
+//        while (iter.hasNext()) {
+//            String key = iter.next();
+//            Map<String, List<String>> val = inputFields.get(key);
+//            Iterator<String> iter2 = val.keySet().iterator();
+//            while (iter2.hasNext()) {
+//                inputvalueNameList = val.get(iter2.next());
+//                for (String item : inputvalueNameList) {
+//                    System.out.println(item);
+//                }
+//            }
 
-        }
+//        }?
     }
 
 
@@ -60,10 +60,10 @@ public class SelectBolt extends BaseBasicBolt {
     }
 
     public void cleanup() {
-        System.out.println("打印结果");
-        for (String item : results) {
-            System.out.println(item);
-        }
+//        System.out.println("选择打印结果");
+//        for (String item : results) {
+//            System.out.println(item);
+//        }
     }
 
     /**
