@@ -64,7 +64,9 @@ public class ProjectionBolt extends BaseBasicBolt {
     @Override
     public void cleanup() {
         super.cleanup();
+
         try {
+            // 最后的映射结果
             FileWriter fileWriter = new FileWriter(this.filePath);
             BufferedWriter bw = new BufferedWriter(fileWriter);
             bw.write("映射的结果\n");
@@ -80,15 +82,6 @@ public class ProjectionBolt extends BaseBasicBolt {
             fileWriter.close();
         }catch (IOException e){
             e.printStackTrace();
-        }
-        // 最后的映射结果
-        System.out.println("映射的结果");
-        for (String item: this.descOfOutputFileds){
-            System.out.print(item+"| ");
-        }
-        System.out.println();
-        for (String item : results) {
-            System.out.println(item);
         }
     }
 

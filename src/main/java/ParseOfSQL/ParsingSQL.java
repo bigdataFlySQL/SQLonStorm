@@ -74,7 +74,7 @@ public class ParsingSQL extends TestCase {
                 Expression expr = sEI.getExpression();
                 if (expr instanceof Column) { //选择某些列，即映射操作
                     Column col = (Column) expr;
-                    System.out.println(col.getColumnName() + " : " + col.getFullyQualifiedName());
+//                    System.out.println(col.getColumnName() + " : " + col.getFullyQualifiedName());
 
                     TCItem tcItem = new TCItem();
                     String tTabName = col.getTable().toString();
@@ -89,7 +89,7 @@ public class ParsingSQL extends TestCase {
                 } else if (expr instanceof Function) {
                     //region //聚合操作提取,目前仅支持max 和 count 操作
                     Function fun = (Function) expr;
-                    System.out.println(fun.getName());
+//                    System.out.println(fun.getName());
                     String funFullName = fun.toString();
                     AgregationFunFactor funFactor = new AgregationFunFactor();
                     funFactor.setFunFullName(funFullName);//设置聚合函数全名
@@ -133,7 +133,7 @@ public class ParsingSQL extends TestCase {
             if (isNotNull(rowCount)) {
                 rowCountVal = ((LongValue) rowCount).getValue();
             }
-            System.out.println(offsetVal + "," + rowCountVal);
+//            System.out.println(offsetVal + "," + rowCountVal);
         }
 
 //        assertEquals(3,offsetVal);
@@ -285,7 +285,7 @@ public class ParsingSQL extends TestCase {
         List<String> results = new ArrayList<String>();
         List<Join> joins = plainSelect.getJoins();
         FromItem fromItem = plainSelect.getFromItem();
-        System.out.println(fromItem.toString());
+//        System.out.println(fromItem.toString());
 //        System.out.println(fromItem.getAlias().getName());
         results.add(fromItem.toString());
         if (joins != null) {
@@ -410,7 +410,7 @@ public class ParsingSQL extends TestCase {
         Expression whereExp = plainSelect.getWhere();
         if (whereExp != null) {
             String whereStr = whereExp.toString();
-            System.out.println(whereStr);
+//            System.out.println(whereStr);
             mSelectRootExp = new BinaryTreeAndOr();
             mSelectRootExp.root = new BinaryTreeAnrOrNode();
             solveAndOr(whereExp, true, mSelectRootExp.root);
@@ -425,7 +425,7 @@ public class ParsingSQL extends TestCase {
         Expression havExp = plainSelect.getHaving();
         if (havExp != null) {
             String havingStr = havExp.toString();
-            System.out.println(havingStr);
+//            System.out.println(havingStr);
 
             TCItem tcItem = new TCItem();
             tcItem.setCompare(true);
