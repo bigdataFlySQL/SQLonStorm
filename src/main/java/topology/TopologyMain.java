@@ -1,6 +1,8 @@
 package topology;
 
 import ParseOfSQL.ParsingSQL;
+import bolts.GroupByBolt;
+import bolts.HavingBolt;
 import bolts.ProjectionBolt;
 import definetable.Global;
 import definetable.MField;
@@ -20,10 +22,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class TopologyMain {
@@ -78,26 +77,45 @@ public class TopologyMain {
             fileReader.close();
 
 
-            //Topology definition
-            TopologyBuilder builder = new TopologyBuilder();
+
             StreamDataReaderSpout sDataSpout = new StreamDataReaderSpout();
             //设置该spout的tuple输出属性名
             sDataSpout.setDescOfOutputFileds(jD_02outFiledNameList);
-            builder.setSpout("data-reader", sDataSpout);
+
             //选择
             SelectBolt selectBolt = new SelectBolt();
             selectBolt.setDescOfOutputFileds(jD_02outFiledNameList);
-            builder.setBolt("select", selectBolt)
-                    .shuffleGrouping("data-reader");
+
+            // 分组 group by
+            GroupByBolt groupByBolt = new GroupByBolt();
+            List<String> groupByOutputFields = new ArrayList<>(jD_02outFiledNameList);
+            if (!AggregationStream.agreFunList.isEmpty()){
+                // SQL 有分组的需求
+                for (AgregationFunFactor funFactor: AggregationStream.agreFunList){
+                    groupByOutputFields.add(funFactor.getFunFullName());
+                }
+            }
+            groupByBolt.setDescOfOutputFileds(groupByOutputFields);
+
+            // Having
+            HavingBolt havingBolt = new HavingBolt();
+            // HavingBolt 的输出属性和GroupByBolt 一样
+            havingBolt.setDescOfOutputFileds(groupByOutputFields);
 
             //映射
-            ProjectionBolt projectionBolt = new ProjectionBolt();
-            builder.setBolt("projection", projectionBolt).shuffleGrouping("select");
+            ProjectionBolt projectionBolt = new ProjectionBolt(ProjectConfig.projection_result_file_path);
+
 //		builder.setBolt("word-counter", new WordCounter(),2)
 //				.shuffleGrouping("word-normalizer");
 //		builder.setBolt("word-counter", new WordCounter(),2)
 //			.fieldsGrouping("word-normalizer", new Fields("word"));
 
+            //Topology definition
+            TopologyBuilder builder = new TopologyBuilder();
+            builder.setSpout("data-reader", sDataSpout);
+            builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
+            builder.setBolt("groupby",groupByBolt).shuffleGrouping("select");
+            builder.setBolt("projection", projectionBolt).shuffleGrouping("groupby");
             //Configuration
             Config conf = new Config();
             conf.setDebug(false);
