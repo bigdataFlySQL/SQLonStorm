@@ -11,7 +11,6 @@ import org.apache.storm.tuple.Tuple;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by yuxiao on 5/16/17.

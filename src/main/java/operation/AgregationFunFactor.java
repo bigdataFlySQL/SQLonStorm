@@ -11,6 +11,7 @@ public class AgregationFunFactor {
 
     private String funStr; // 聚合函数名,目前仅支持 Max, count
     private List<TCItem> parameterList; // 函数列表 如MAX(tab1.c) 则list集合为{tab1.c}
+    private String funFullName; // 聚合函数全名 如 count(tab1.A)
 
     public String getFunStr() {
         return funStr;
@@ -26,5 +27,13 @@ public class AgregationFunFactor {
 
     public void setParameterList(List<TCItem> parameterList) {
         this.parameterList = parameterList;
+    }
+
+    public String getFunFullName() {
+        return funFullName;
+    }
+
+    public void setFunFullName(String funFullName) {
+        this.funFullName = funFullName;
     }
 }
