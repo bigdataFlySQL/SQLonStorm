@@ -1,43 +1,50 @@
 package bolts;
 
-import jdk.nashorn.internal.scripts.JO;
 import operation.JoinCondition;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
-import org.apache.storm.thrift.TUnion;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseWindowedBolt;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.windowing.TupleWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  *
- * Created by yao on 5/16/17.
+ * Created by yao on 5/18/17.
  */
-public class JoinBolt extends BaseWindowedBolt {
+public class JoinBolt_ extends BaseWindowedBolt{
     private static final Logger LOG = LoggerFactory.getLogger(BaseWindowedBolt.class);
+    private List<Tuple> List_joinTab = new ArrayList<Tuple>();
+    private List<Tuple> List_originTab = new ArrayList<Tuple>();
+    private List<String> inputValueNameList;
+    private List<String> descOfOutputFileds;
 
-    List<Tuple> List_joinTab = new ArrayList<Tuple>();
-    List<Tuple> List_originTab = new ArrayList<Tuple>();
-    List<String> inputValueNameList;
-    List<String> results;
-//    List<>
     private OutputCollector collector;
-    public JoinBolt() {
+    public JoinBolt_() {
         super();
+    }
+//    private List<Object> results;
+    public List<String> getDescOfOutputFileds() {
+        return descOfOutputFileds;
+    }
+
+    public void setDescOfOutputFileds(List<String> descOfOutputFileds) {
+        this.descOfOutputFileds = descOfOutputFileds;
     }
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         super.prepare(stormConf, context, collector);
         this.collector = collector;
-        results = new ArrayList<>();
+//        results = new ArrayList<>();
         Map<String, Map<String, List<String>>> inputFields = context.getThisInputFields();
         Iterator<String> iter = inputFields.keySet().iterator();
         while (iter.hasNext()){
@@ -58,7 +65,6 @@ public class JoinBolt extends BaseWindowedBolt {
         List<Tuple> tuplesInWindow = tupleWindow.get();
         List<Tuple> newTuples = tupleWindow.getNew();
         List<Tuple> expiredTuples = tupleWindow.getExpired();
-
         LOG.debug("Events in current window: " + tuplesInWindow.size());
         if(expiredTuples.size() > 0){
             System.out.println(newTuples.size());
@@ -75,7 +81,7 @@ public class JoinBolt extends BaseWindowedBolt {
             JoinTabName = A.split("\\|")[0];
             JoinOP = A.split("\\|")[1];
             compareCol = JoinCondition.linkTablemap.get(A).getTcItemRight().getColName();
-//            results.add("hello world1");
+
             System.out.println(A + "  " +OriginTabName+ "  " + JoinTabName + "  "+ JoinOP+ "  " + compareCol);
         }
         for(Tuple tuple: newTuples){
@@ -89,7 +95,7 @@ public class JoinBolt extends BaseWindowedBolt {
 
             }
         }
-        boolean flag = false;
+
         if(JoinOP.equals("Left")) {
             Left_Join(compareCol);
         }
@@ -99,140 +105,131 @@ public class JoinBolt extends BaseWindowedBolt {
         else if(JoinOP.equals("Inner")){
             Inner_Join(compareCol);
         }
+
     }
 
     public void Left_Join(String compareCol){
         boolean flag = false;
         for(int i = 0;i<List_originTab.size();i++){
             for(int j = 0;j<List_joinTab.size();j++){
-                String B = "";
+                List<Object> result = new ArrayList<>();
                 if(List_joinTab.get(j).getValueByField(compareCol).equals(List_originTab.get(i).getValueByField(compareCol))){
-                    for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
-                        if(ii == 0)
-                            B += List_originTab.get(i).getString(ii) + ",";
-                        else
-                            B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
+                    for(int ii = 0;ii < List_originTab.get(i).size();ii++){
+                        result.add(List_originTab.get(i).getString(ii));
                     }
-                    for(int jj = 1;jj < List_joinTab.get(j).size();jj++ ){
+                    for(int jj = 1;jj < List_joinTab.get(j).size();jj++){
                         if(List_joinTab.get(j).getFields().get(jj).equals(compareCol))
                             continue;
-                        if(jj == List_joinTab.get(j).size() - 1) {
-                            B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj);
-                            continue;
-                        }
-                        B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj) + ",";
+                        result.add(List_joinTab.get(j).getString(jj));
                     }
-                    results.add(B);
+                    collector.emit(result);
                     flag = true;
                 }
-
             }
             if(flag == false){
-                String B = "";
+                List<Object> result = new ArrayList<>();
                 for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
-                    if(ii == 0)
-                        B += List_originTab.get(i).getString(ii) + ",";
-                    else
-                        B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
+                    result.add(List_originTab.get(i).getString(ii));
                 }
                 for(int jj = 0;jj < List_joinTab.get(0).size() - 2;jj++){
-                    if(jj == List_joinTab.get(0).size() - 3) {
-                        B += List_joinTab.get(0).getString(0) + ".";
-                        continue;
-                    }
-                    B += List_joinTab.get(0).getString(0) + ".,";
+                    result.add(null);
                 }
-                results.add(B);
-            }else {
-                flag = false;
+                collector.emit(result);
             }
+            else flag = false;
+
         }
+
     }
+
+
 
     public void Right_Join(String compareCol){
         boolean flag = false;
-        for(int i = 0;i<List_joinTab.size();i++){
-            for(int j = 0;j<List_originTab.size();j++){
-                String B = "";
+        for(int i = 0;i< List_joinTab.size();i++){
+            for(int j = 0;i<List_originTab.size();j++){
+                List<Object> result = new ArrayList<>();
                 if(List_originTab.get(j).getValueByField(compareCol).equals(List_joinTab.get(i).getValueByField(compareCol))){
-                    for(int ii = 0;ii < List_joinTab.get(i).size();ii++ ){
+                    for(int ii = 0;ii<List_joinTab.get(i).size();ii++){
                         if(ii == 0)
-                            B += List_originTab.get(j).getString(0) + ",";
+                            result.add(List_originTab.get(j).getString(0));
                         else
-                            B += List_joinTab.get(i).getString(0) + "." + List_joinTab.get(j).getString(ii) + ",";
+                            result.add(List_joinTab.get(j).getString(ii));
                     }
-                    for(int jj = 1;jj < List_originTab.get(j).size();jj++ ){
-                        B += List_originTab.get(j).getString(0) + "." + List_originTab.get(j).getString(jj) + ",";
+                    for(int jj = 1;jj < List_originTab.get(j).size();jj++){
+                        if(List_originTab.get(j).getFields().get(jj).equals(compareCol))
+                            continue;
+                        result.add(List_originTab.get(j).getString(jj));
                     }
-                    results.add(B);
                     flag = true;
+                    collector.emit(result);
                 }
-
             }
             if(flag == false){
-                String B = "";
+                List<Object> result = new ArrayList<>();
                 for(int ii = 0;ii < List_joinTab.get(i).size();ii++ ){
-                    if(ii==0){
-                        B += List_originTab.get(0).getString(0);
-                    }
-
-                    else {
-                        B += List_joinTab.get(i).getString(ii) + "." + List_joinTab.get(i).getString(ii) + ",";
-                    }
+                    if(ii == 0)
+                        result.add(List_originTab.get(0).getString(0));
+                    else
+                        result.add(List_joinTab.get(i).getString(ii));
                 }
-                results.add(B);
-            }else {
+                for(int jj = 0;jj < List_originTab.get(0).size() - 2;jj++){
+                    result.add(null);
+                }
+                collector.emit(result);
+            }else
                 flag = false;
-            }
         }
     }
 
     public void Inner_Join(String compareCol){
-        for(int i = 0;i<List_originTab.size();i++){
-            for(int j = 0;j<List_joinTab.size();j++){
-                String B = "";
-                if(List_joinTab.get(j).getValueByField(compareCol).equals(List_originTab.get(i).getValueByField(compareCol))){
-                    for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
-                        if(ii == 0)
-                            B += List_originTab.get(i).getString(ii) + ",";
-                        else
-                            B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
+        boolean flag = false;
+        for(int i = 0;i<List_originTab.size();i++) {
+            for (int j = 0; j < List_joinTab.size(); j++) {
+                List<Object> result = new ArrayList<>();
+                if (List_joinTab.get(j).getValueByField(compareCol).equals(List_originTab.get(i).getValueByField(compareCol))) {
+                    for (int ii = 0; ii < List_originTab.get(i).size(); ii++) {
+                        result.add(List_originTab.get(i).getString(ii));
                     }
-                    for(int jj = 1;jj < List_joinTab.get(j).size();jj++ ){
-                        if(List_joinTab.get(j).getFields().get(jj).equals(compareCol))
+                    for (int jj = 1; jj < List_joinTab.get(j).size(); jj++) {
+                        if (List_joinTab.get(j).getFields().get(jj).equals(compareCol))
                             continue;
-                        if(jj == List_joinTab.get(j).size() - 1) {
-                            B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj);
-                            continue;
-                        }
-                        B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj) + ",";
+                        result.add(List_joinTab.get(j).getString(jj));
                     }
-                    results.add(B);
+                    collector.emit(result);
+                    flag = true;
                 }
             }
         }
     }
 
-
     @Override
     public void cleanup() {
-
-        System.out.println("打印结果");
-        for(String item : results){
-            System.out.println(item);
-            System.out.println("---------------------------------------------");
-        }
+//        System.out.println("****hehehe*****hehehe****");
+//        for(String string:descOfOutputFileds){
+//            System.out.println(string);
+//        }
+//        System.out.println("打印结果");
+//        for(String item : results){
+//            System.out.println(item);
+//            System.out.println("---------------------------------------------");
+//        }
         super.cleanup();
 
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+
         super.declareOutputFields(declarer);
+
+        declarer.declare(new Fields(getDescOfOutputFileds()));
     }
 
     @Override
     public Map<String, Object> getComponentConfiguration() {
         return super.getComponentConfiguration();
     }
+
+
 }
