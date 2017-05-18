@@ -89,14 +89,15 @@ public class JoinBolt extends BaseWindowedBolt {
 
             }
         }
-//        results.add("hello world2");
-
         boolean flag = false;
         if(JoinOP.equals("Left")) {
             Left_Join(compareCol);
         }
         else if(JoinOP.equals("Right")){
             Right_Join(compareCol);
+        }
+        else if(JoinOP.equals("Inner")){
+            Inner_Join(compareCol);
         }
     }
 
@@ -113,6 +114,12 @@ public class JoinBolt extends BaseWindowedBolt {
                             B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
                     }
                     for(int jj = 1;jj < List_joinTab.get(j).size();jj++ ){
+                        if(List_joinTab.get(j).getFields().get(jj).equals(compareCol))
+                            continue;
+                        if(jj == List_joinTab.get(j).size() - 1) {
+                            B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj);
+                            continue;
+                        }
                         B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj) + ",";
                     }
                     results.add(B);
@@ -127,6 +134,13 @@ public class JoinBolt extends BaseWindowedBolt {
                         B += List_originTab.get(i).getString(ii) + ",";
                     else
                         B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
+                }
+                for(int jj = 0;jj < List_joinTab.get(0).size() - 2;jj++){
+                    if(jj == List_joinTab.get(0).size() - 3) {
+                        B += List_joinTab.get(0).getString(0) + ".";
+                        continue;
+                    }
+                    B += List_joinTab.get(0).getString(0) + ".,";
                 }
                 results.add(B);
             }else {
@@ -145,7 +159,7 @@ public class JoinBolt extends BaseWindowedBolt {
                         if(ii == 0)
                             B += List_originTab.get(j).getString(0) + ",";
                         else
-                            B += List_joinTab.get(i).getString(0) + "." + List_joinTab.get(i).getString(ii) + ",";
+                            B += List_joinTab.get(i).getString(0) + "." + List_joinTab.get(j).getString(ii) + ",";
                     }
                     for(int jj = 1;jj < List_originTab.get(j).size();jj++ ){
                         B += List_originTab.get(j).getString(0) + "." + List_originTab.get(j).getString(jj) + ",";
@@ -172,6 +186,33 @@ public class JoinBolt extends BaseWindowedBolt {
             }
         }
     }
+
+    public void Inner_Join(String compareCol){
+        for(int i = 0;i<List_originTab.size();i++){
+            for(int j = 0;j<List_joinTab.size();j++){
+                String B = "";
+                if(List_joinTab.get(j).getValueByField(compareCol).equals(List_originTab.get(i).getValueByField(compareCol))){
+                    for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
+                        if(ii == 0)
+                            B += List_originTab.get(i).getString(ii) + ",";
+                        else
+                            B += List_originTab.get(i).getString(0) + "." + List_originTab.get(i).getString(ii) + ",";
+                    }
+                    for(int jj = 1;jj < List_joinTab.get(j).size();jj++ ){
+                        if(List_joinTab.get(j).getFields().get(jj).equals(compareCol))
+                            continue;
+                        if(jj == List_joinTab.get(j).size() - 1) {
+                            B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj);
+                            continue;
+                        }
+                        B += List_joinTab.get(j).getString(0) + "." + List_joinTab.get(j).getString(jj) + ",";
+                    }
+                    results.add(B);
+                }
+            }
+        }
+    }
+
 
     @Override
     public void cleanup() {
