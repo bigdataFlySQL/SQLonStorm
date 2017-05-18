@@ -193,12 +193,14 @@ public class ParsingSQL extends TestCase {
         if (mJoins != null) {
             for (Join itemJoin : mJoins) {
                 String tjoinTableName = ((Table) itemJoin.getRightItem()).getFullyQualifiedName();
-                String joinType = ""; // 连接类型目前仅支持 outter join ,inner join , left join
+                String joinType = ""; // 连接类型目前仅支持 outter join ,inner join , left join, right join
                 if (itemJoin.isInner()) {
                     joinType = "Inner";
                 } else if (itemJoin.isOuter()) {
                     joinType = "Outer";
-                } else {
+                } else if (itemJoin.isRight()){
+                    joinType = "Right";
+                }else{
                     joinType = "Left";
                 }
                 tjoinTableName += "|" + joinType;
