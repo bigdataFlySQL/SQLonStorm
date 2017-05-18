@@ -1,6 +1,7 @@
 package bolts;
 
 import operation.JoinCondition;
+import org.apache.storm.shade.org.apache.commons.lang.ObjectUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -20,7 +21,7 @@ import java.util.Map;
  *
  * Created by yao on 5/18/17.
  */
-public class JoinBolt_ extends BaseWindowedBolt{
+public class JoinBolt extends BaseWindowedBolt{
     private static final Logger LOG = LoggerFactory.getLogger(BaseWindowedBolt.class);
     private List<Tuple> List_joinTab = new ArrayList<Tuple>();
     private List<Tuple> List_originTab = new ArrayList<Tuple>();
@@ -28,7 +29,7 @@ public class JoinBolt_ extends BaseWindowedBolt{
     private List<String> descOfOutputFileds;
 
     private OutputCollector collector;
-    public JoinBolt_() {
+    public JoinBolt() {
         super();
     }
 //    private List<Object> results;
@@ -132,7 +133,7 @@ public class JoinBolt_ extends BaseWindowedBolt{
                     result.add(List_originTab.get(i).getString(ii));
                 }
                 for(int jj = 0;jj < List_joinTab.get(0).size() - 2;jj++){
-                    result.add(null);
+                    result.add("");
                 }
                 collector.emit(result);
             }
@@ -147,14 +148,14 @@ public class JoinBolt_ extends BaseWindowedBolt{
     public void Right_Join(String compareCol){
         boolean flag = false;
         for(int i = 0;i< List_joinTab.size();i++){
-            for(int j = 0;i<List_originTab.size();j++){
+            for(int j = 0;j<List_originTab.size();j++){
                 List<Object> result = new ArrayList<>();
-                if(List_originTab.get(j).getValueByField(compareCol).equals(List_joinTab.get(i).getValueByField(compareCol))){
+                if(List_joinTab.get(i).getValueByField(compareCol).equals(List_originTab.get(j).getValueByField(compareCol))){
                     for(int ii = 0;ii<List_joinTab.get(i).size();ii++){
                         if(ii == 0)
-                            result.add(List_originTab.get(j).getString(0));
+                            result.add(List_originTab.get(0).getString(0));
                         else
-                            result.add(List_joinTab.get(j).getString(ii));
+                            result.add(List_joinTab.get(i).getString(ii));
                     }
                     for(int jj = 1;jj < List_originTab.get(j).size();jj++){
                         if(List_originTab.get(j).getFields().get(jj).equals(compareCol))
@@ -174,7 +175,7 @@ public class JoinBolt_ extends BaseWindowedBolt{
                         result.add(List_joinTab.get(i).getString(ii));
                 }
                 for(int jj = 0;jj < List_originTab.get(0).size() - 2;jj++){
-                    result.add(null);
+                    result.add("");
                 }
                 collector.emit(result);
             }else

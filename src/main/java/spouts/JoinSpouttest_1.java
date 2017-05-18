@@ -38,44 +38,7 @@ public class JoinSpouttest_1 extends BaseRichSpout {
     private List<String> descOfOutputFields;
     @Override
     public void open(Map conf, TopologyContext topologyContext, SpoutOutputCollector collector) {
-        try {
-            this.fileReader = new FileReader(conf.get("InputSQL").toString());
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            parsingSQL = new ParsingSQL();
-            String sql = "";
-            boolean flag = true;
 
-            while(flag && (sql = bufferedReader.readLine()) != null){
-                System.out.println(sql);
-                parsingSQL.testparsingTheSQL(sql);
-                //region 测试SQL 语义是否解析成功
-                System.out.println(Selection.binaryTreeAndOr == null);
-                BinaryTreeAndOr binaryTreeAndOr = Selection.binaryTreeAndOr;
-                System.out.println(Projection.proList.size());
-                List<TCItem> tp = Projection.proList;
-                System.out.println(Selection.fromTableList.size());
-                List<String> ft= Selection.fromTableList;
-                System.out.println(JoinCondition.linkTablemap.size());
-                Map<String, JoinTwoTable> tj = JoinCondition.linkTablemap;
-                System.out.print(GroupBy.groupList.size());
-                List<TCItem> tg = GroupBy.groupList;
-                System.out.println(AggregationStream.agreFunList.size());
-                List<AgregationFunFactor> ag = AggregationStream.agreFunList;
-                System.out.println(AggregationStream.havingList.size());
-                List<TCItem> th = AggregationStream.havingList;
-                // endregion
-                //只读取一条sql语句
-                flag=false;
-            }
-            bufferedReader.close();
-            this.fileReader.close();
-        }catch (FileNotFoundException e){
-            throw new RuntimeException("Error reading file");
-        }catch (IOException e){
-            e.printStackTrace();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
         this.collector = collector;
     }
 
@@ -102,7 +65,7 @@ public class JoinSpouttest_1 extends BaseRichSpout {
             System.out.println("成功加载MySQL驱动程序");
             conn = DriverManager.getConnection(url);
             Statement statement = conn.createStatement();
-            String sql = "SELECT * FROM JData_Action_201602 LIMIT 0, 10";
+            String sql = "SELECT * FROM JData_Action_201602 LIMIT 3, 13";
             ResultSet rs = statement.executeQuery(sql);
 
 

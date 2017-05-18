@@ -7,8 +7,8 @@ package domain;
 public class ProjectConfig {
     public static String mySQL_user = "root";
     public static String mySQL_passwd ="12211104";
-    public static String res_createTab_path = "/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/createtabledata.txt";
-    public static String res_inputSQL_path ="/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/InputSQL.txt";
-    public static String res_table_struct_path="/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/table_struct.txt";
-    public static String projection_result_file_path = "/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/result.txt";
+    public static String res_createTab_path = "/home/yao/intellij_IDE/work_space/SQLonStorm/src/main/resources/createtabledata.txt";
+    public static String res_inputSQL_path ="/home/yao/intellij_IDE/work_space/SQLonStorm/src/main/resources/InputSQL.txt";
+    public static String res_table_struct_path="/home/yao/intellij_IDE/work_space/SQLonStorm/src/main/resources/table_struct.txt";
+    public static String projection_result_file_path = "/home/yao/intellij_IDE/work_space/SQLonStorm/src/main/resources/result.txt";
 }
