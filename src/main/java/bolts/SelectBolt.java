@@ -60,10 +60,10 @@ public class SelectBolt extends BaseBasicBolt {
     }
 
     public void cleanup() {
-//        System.out.println("选择打印结果");
-//        for (String item : results) {
-//            System.out.println(item);
-//        }
+        System.out.println("选择打印结果");
+        for (String item : results) {
+            System.out.println(item);
+        }
     }
 
     /**
@@ -102,7 +102,9 @@ public class SelectBolt extends BaseBasicBolt {
 
         // 获取这次tuple的表名
         String curTableName = tuple.getStringByField("Table");
-
+        if (curTableName.equals("JData_Action_201602")){
+            System.out.println("SelectBolt");
+        }
 
         Stack<BinaryTreeAnrOrNode> stack = new Stack<BinaryTreeAnrOrNode>();
         BinaryTreeAnrOrNode p, r;

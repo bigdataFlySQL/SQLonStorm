@@ -98,8 +98,8 @@ public class TopologyMain {
                 secSpoutOutFiledList = loadDataStruct(joinTableName);
                 sjoinTableDataSpout = new StreamDataReaderSpout(); // 初始化join表的数据源
                 MTable mSecTable = dataBase.get(joinTableName);
-                sjoinTableDataSpout.setTableName(joinTableName);
-//                sjoinTableDataSpout.setmTable(mSecTable); // 指定数据源来自的表
+                sjoinTableDataSpout.setTableName(joinTableName);// 指定数据源来自的表
+//                sjoinTableDataSpout.setmTable(mSecTable);
                 sjoinTableDataSpout.setDescOfOutputFileds(secSpoutOutFiledList);
             }
 
@@ -114,7 +114,7 @@ public class TopologyMain {
             if (isJoin) {
                 selectJoinBolt = new SelectBolt();
                 selectJoinBolt.setDescOfOutputFileds(secSpoutOutFiledList);
-                joinBolt = (JoinBolt) new JoinBolt().withTumblingWindow(new BaseWindowedBolt.Duration(5, TimeUnit.SECONDS));
+                joinBolt = (JoinBolt) new JoinBolt().withTumblingWindow(new BaseWindowedBolt.Duration(6000, TimeUnit.MILLISECONDS));
                 joinBoltOutFields = joinDataStruct();
                 joinBolt.setDescOfOutputFileds(joinBoltOutFields);
             }
@@ -153,7 +153,9 @@ public class TopologyMain {
                 builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
                 builder.setBolt("select-join",selectJoinBolt).shuffleGrouping("join-data-reader");
                 builder.setBolt("join", joinBolt).shuffleGrouping("select").shuffleGrouping("select-join");
-                builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("join");
+                builder.setBolt("projection", projectionBolt).shuffleGrouping("join");
+
+//                builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("join");
 
             }
 
@@ -169,7 +171,7 @@ public class TopologyMain {
             conf.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("Getting-Started-Toplogie", conf, builder.createTopology());
-            Thread.sleep(8000);
+            Thread.sleep(15000);
             cluster.shutdown();
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Error reading file ");

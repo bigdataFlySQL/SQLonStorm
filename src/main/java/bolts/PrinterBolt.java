@@ -35,6 +35,7 @@ public class PrinterBolt extends BaseBasicBolt {
   @Override
   public void cleanup() {
     super.cleanup();
+    System.out.println("print bolt shutdown **********************************");
 
 
   }

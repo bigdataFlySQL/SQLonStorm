@@ -30,12 +30,12 @@ public class ProjectionBolt extends BaseBasicBolt {
 
     private List<String> descOfOutputFileds;
     private String filePath;
-    private boolean flag=true;
+    private boolean flag = true;
 
 
-    public ProjectionBolt(String filePath){
-       this.filePath = filePath;
-   }
+    public ProjectionBolt(String filePath) {
+        this.filePath = filePath;
+    }
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
@@ -70,8 +70,8 @@ public class ProjectionBolt extends BaseBasicBolt {
             FileWriter fileWriter = new FileWriter(this.filePath);
             BufferedWriter bw = new BufferedWriter(fileWriter);
             bw.write("映射的结果\n");
-            for (String item: this.descOfOutputFileds){
-                bw.write(item+"| ");
+            for (String item : this.descOfOutputFileds) {
+                bw.write(item + "| ");
             }
             bw.write('\n');
             for (String item : results) {
@@ -80,7 +80,7 @@ public class ProjectionBolt extends BaseBasicBolt {
             }
             bw.close();
             fileWriter.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -103,27 +103,52 @@ public class ProjectionBolt extends BaseBasicBolt {
                     break;// 目前仅支持 select * 后面没有其他映射条件
                 }
 
-                if (curTableName.equals(tcItem.getTableName())) {
-                    //表名相同,获取相对应的值
-                    if (flag){
-                        this.descOfOutputFileds.add(curTableName+"."+tcItem.getColName());
-                    }
-                    String getTargetVal = tuple.getStringByField(tcItem.getColName()) + ",";
-                    sb.append(getTargetVal);
+//                if (curTableName.equals(tcItem.getTableName())) {
+//                    //表名相同,获取相对应的值
+//                    if (flag){
+//                        this.descOfOutputFileds.add(curTableName+"."+tcItem.getColName());
+//                    }
+//                    String getTargetVal = tuple.getStringByField(tcItem.getColName()) + ",";
+//                    sb.append(getTargetVal);
+//                }else{
+//                    // 处理join
+//                    if (flag){
+//                        this.descOfOutputFileds.add(tempKeyFieldName);
+//                    }
+//                    String getTargetVal = tuple.getStringByField(tempKeyFieldName) + ",";
+//                    sb.append(getTargetVal);
+//                }
+
+                // 处理join
+                String tempKeyFieldName = tcItem.getTableName() + "." + tcItem.getColName();
+
+                if (flag) {
+                    this.descOfOutputFileds.add(tempKeyFieldName);
                 }
+                String tVal=null;
+                try {
+                    tVal = tuple.getStringByField(tempKeyFieldName);
+                }catch (Exception e){
+                    tempKeyFieldName=tcItem.getColName();
+                    tVal = tuple.getStringByField(tempKeyFieldName);
+                }
+                String getTargetVal = tVal + ",";
+                sb.append(getTargetVal);
+
+
             }
 
         }
 
         // 处理聚合映射
         for (AgregationFunFactor funFactor : AggregationStream.agreFunList) {
-            if(flag){
+            if (flag) {
                 this.descOfOutputFileds.add(funFactor.getFunFullName());
             }
             sb.append(tuple.getStringByField(funFactor.getFunFullName()));
         }
 
-        flag=false;// 保证 descOfOutputFileds 只获取一次输出属性名
+        flag = false;// 保证 descOfOutputFileds 只获取一次输出属性名
         if (!sb.toString().isEmpty()) {
             this.results.add(sb.toString());
         }
