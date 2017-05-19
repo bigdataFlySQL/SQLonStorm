@@ -27,3 +27,12 @@ CREATE TABLE `JData_Action_201605` (
   `cate` int(11) DEFAULT NULL,
   `brand` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `JData_Product` (
+  `sku_id` int(11) DEFAULT NULL,
+  `attr1` int(11) DEFAULT NULL,
+  `attr2` int(11) DEFAULT NULL,
+  `attr3` int(11) DEFAULT NULL,
+  `cate` int(11) DEFAULT NULL,
+  `brand` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

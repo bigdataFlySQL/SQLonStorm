@@ -65,7 +65,7 @@ public class JoinSpouttest_2 extends BaseRichSpout {
             System.out.println("成功加载MySQL驱动程序");
             conn = DriverManager.getConnection(url);
             Statement statement = conn.createStatement();
-            String sql = "SELECT * FROM JData_Action_201603 LIMIT 3, 13";
+            String sql = "SELECT * FROM JData_Product LIMIT 3, 13";
             ResultSet rs = statement.executeQuery(sql);
             System.out.println("----------------");
 
@@ -73,14 +73,14 @@ public class JoinSpouttest_2 extends BaseRichSpout {
             while (rs.next()){
                 Values emitVal = new Values();
 
-                emitVal.add("JData_Action_201603");
+                emitVal.add("JData_Product");
                 emitVal.add(rs.getString(1));
                 emitVal.add(rs.getString(2));
                 emitVal.add(rs.getString(3));
                 emitVal.add(rs.getString(4));
                 emitVal.add(rs.getString(5));
                 emitVal.add(rs.getString(6));
-                emitVal.add(rs.getString(7));
+//                emitVal.add(rs.getString(7));
 
                 this.collector.emit(emitVal, msgid++);
 
@@ -113,7 +113,7 @@ public class JoinSpouttest_2 extends BaseRichSpout {
         try{
             Global.loadingDataStructure("/home/yao/intellij_IDE/work_space/SQLonStorm/src/main/resources/createtabledata.txt");
             HashMap<String, MTable> dataBase = Global.DataBase;
-            MTable jData_Action_201603 = dataBase.get("JData_Action_201603");
+            MTable jData_Action_201603 = dataBase.get("JData_Product");
             this.descOfOutputFields = new ArrayList<String>();
             this.descOfOutputFields.add("Table");
             for(MField mField: jData_Action_201603.getField()){
