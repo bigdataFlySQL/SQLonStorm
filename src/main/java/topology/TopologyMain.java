@@ -148,21 +148,23 @@ public class TopologyMain {
             //Topology definition
             TopologyBuilder builder = new TopologyBuilder();
             builder.setSpout("data-reader", sDataSpout);
-            builder.setSpout("join-data-reader",sjoinTableDataSpout);
-            if (isJoin) {
+            if (isJoin) { //有连接
+                builder.setSpout("join-data-reader", sjoinTableDataSpout);
+
                 builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
-                builder.setBolt("select-join",selectJoinBolt).shuffleGrouping("join-data-reader");
+                builder.setBolt("select-join", selectJoinBolt).shuffleGrouping("join-data-reader");
                 builder.setBolt("join", joinBolt).shuffleGrouping("select").shuffleGrouping("select-join");
                 builder.setBolt("projection", projectionBolt).shuffleGrouping("join");
 
 //                builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("join");
 
-            }
+            } else {
+                builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
+                builder.setBolt("group-by", groupByBolt).shuffleGrouping("select");
+                builder.setBolt("having", havingBolt).shuffleGrouping("group-by");
+                builder.setBolt("projection", projectionBolt).shuffleGrouping("having");
 
-//            builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
-//            builder.setBolt("group-by", groupByBolt).shuffleGrouping("select");
-//            builder.setBolt("having", havingBolt).shuffleGrouping("group-by");
-//            builder.setBolt("projection", projectionBolt).shuffleGrouping("having");
+            }
 
             //Configuration
             Config conf = new Config();

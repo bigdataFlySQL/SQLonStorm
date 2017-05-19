@@ -1,3 +1,4 @@
+SELECT JData_Action_201602.sku_id, JData_Action_201602.cate FROM JData_Action_201602 where JData_Action_201602.brand>100 or (JData_Action_201602.cate >4 AND JData_Action_201602.type=1);
 select JData_Action_201602.sku_id,JData_Product.brand FROM JData_Action_201602 INNER JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate;
 select * FROM JData_Action_201602 INNER JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate where JData_Action_201602.type =1;
 
@@ -9,7 +10,7 @@ select JData_Action_201602.sku_id,JData_Product.brand FROM JData_Action_201602 I
 
 select * FROM JData_Action_201602 left JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate
 
-select * FROM JData_Action_201602 riht JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate
+select * FROM JData_Action_201602 right JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate
 
 SELECT JData_Action_201602.sku_id, JData_Action_201602.cate FROM JData_Action_201602 where JData_Action_201602.brand>100 or (JData_Action_201602.cate >4 AND JData_Action_201602.type=1);
 SELECT JData_Action_201602.user_id,JData_Action_201602.sku_id,JData_Action_201602.time FROM JData_Action_201602 where JData_Action_201602.sku_id=138778 and (JData_Action_201602.type=6 or JData_Action_201602.type=1);
