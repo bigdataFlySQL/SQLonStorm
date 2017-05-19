@@ -32,7 +32,7 @@ public class JoinBolt extends BaseWindowedBolt{
     public JoinBolt() {
         super();
     }
-//    private List<Object> results;
+    //    private List<Object> results;
     public List<String> getDescOfOutputFileds() {
         return descOfOutputFileds;
     }
@@ -116,7 +116,10 @@ public class JoinBolt extends BaseWindowedBolt{
                 List<Object> result = new ArrayList<>();
                 if(List_joinTab.get(j).getValueByField(compareCol).equals(List_originTab.get(i).getValueByField(compareCol))){
                     for(int ii = 0;ii < List_originTab.get(i).size();ii++){
-                        result.add(List_originTab.get(i).getString(ii));
+                        if(ii==0)
+                            result.add(List_originTab.get(i).getString(ii)+"|join");
+                        else
+                            result.add(List_originTab.get(i).getString(ii));
                     }
                     for(int jj = 1;jj < List_joinTab.get(j).size();jj++){
                         if(List_joinTab.get(j).getFields().get(jj).equals(compareCol))
@@ -130,7 +133,10 @@ public class JoinBolt extends BaseWindowedBolt{
             if(flag == false){
                 List<Object> result = new ArrayList<>();
                 for(int ii = 0;ii < List_originTab.get(i).size();ii++ ){
-                    result.add(List_originTab.get(i).getString(ii));
+                    if(ii == 0)
+                        result.add(List_originTab.get(i).getString(ii)+"|join");
+                    else
+                        result.add(List_originTab.get(i).getString(ii));
                 }
                 for(int jj = 0;jj < List_joinTab.get(0).size() - 2;jj++){
                     result.add("");
@@ -153,7 +159,7 @@ public class JoinBolt extends BaseWindowedBolt{
                 if(List_joinTab.get(i).getValueByField(compareCol).equals(List_originTab.get(j).getValueByField(compareCol))){
                     for(int ii = 0;ii<List_joinTab.get(i).size();ii++){
                         if(ii == 0)
-                            result.add(List_originTab.get(0).getString(0));
+                            result.add(List_originTab.get(0).getString(0)+"|join");
                         else
                             result.add(List_joinTab.get(i).getString(ii));
                     }
@@ -170,7 +176,7 @@ public class JoinBolt extends BaseWindowedBolt{
                 List<Object> result = new ArrayList<>();
                 for(int ii = 0;ii < List_joinTab.get(i).size();ii++ ){
                     if(ii == 0)
-                        result.add(List_originTab.get(0).getString(0));
+                        result.add(List_originTab.get(0).getString(0)+"|join");
                     else
                         result.add(List_joinTab.get(i).getString(ii));
                 }
@@ -190,7 +196,10 @@ public class JoinBolt extends BaseWindowedBolt{
                 List<Object> result = new ArrayList<>();
                 if (List_joinTab.get(j).getValueByField(compareCol).equals(List_originTab.get(i).getValueByField(compareCol))) {
                     for (int ii = 0; ii < List_originTab.get(i).size(); ii++) {
-                        result.add(List_originTab.get(i).getString(ii));
+                        if(ii == 0)
+                            result.add(List_originTab.get(i).getString(ii)+"|join");
+                        else
+                            result.add(List_originTab.get(i).getString(ii));
                     }
                     for (int jj = 1; jj < List_joinTab.get(j).size(); jj++) {
                         if (List_joinTab.get(j).getFields().get(jj).equals(compareCol))

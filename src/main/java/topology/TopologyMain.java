@@ -121,8 +121,13 @@ public class TopologyMain {
 
 
             // 分组 group by
-            GroupByBolt groupByBolt = new GroupByBolt();
-            List<String> groupByOutputFields = new ArrayList<>(jD_02outFiledNameList);
+            GroupByBolt groupByBolt = (GroupByBolt) new GroupByBolt().withTumblingWindow(new BaseWindowedBolt.Duration(2000, TimeUnit.MILLISECONDS));
+            List<String> groupByOutputFields = null;
+            if (isJoin) {
+                groupByOutputFields = new ArrayList<>(joinBoltOutFields);
+            } else {
+                groupByOutputFields = new ArrayList<>(jD_02outFiledNameList);
+            }
             if (!AggregationStream.agreFunList.isEmpty()) {
                 // SQL 有分组的需求
                 for (AgregationFunFactor funFactor : AggregationStream.agreFunList) {
@@ -154,7 +159,9 @@ public class TopologyMain {
                 builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
                 builder.setBolt("select-join", selectJoinBolt).shuffleGrouping("join-data-reader");
                 builder.setBolt("join", joinBolt).shuffleGrouping("select").shuffleGrouping("select-join");
-                builder.setBolt("projection", projectionBolt).shuffleGrouping("join");
+                builder.setBolt("group-by", groupByBolt).shuffleGrouping("join");
+                builder.setBolt("having", havingBolt).shuffleGrouping("group-by");
+                builder.setBolt("projection", projectionBolt).shuffleGrouping("having");
 
 //                builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("join");
 

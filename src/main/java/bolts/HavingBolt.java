@@ -35,10 +35,18 @@ public class HavingBolt extends BaseBasicBolt {
             // SQL 有having 需求
             boolean isPassing = false;
             for (TCItem tcItem : AggregationStream.havingList) {
+                Integer compLeftVal =null;
+                if (curTableName.contains("|")){
+                    // 含有join
+                 String keyStr = tcItem.getTableName()+"."+tcItem.getColName();
+                    // 从当前tuple中获取表达式左边待比较的值
+                    compLeftVal = Integer.valueOf((String) input.getValueByField(keyStr));
+                }else{
+                    // 要比较属性的表名相同
+                    // 从当前tuple中获取表达式左边待比较的值
+                    compLeftVal = Integer.valueOf((String) input.getValueByField(tcItem.getColName()));
+                }
 
-                // 要比较属性的表名相同
-                // 从当前tuple中获取表达式左边待比较的值
-                Integer compLeftVal = Integer.valueOf((String) input.getValueByField(tcItem.getColName()));
                 Integer compRightVal = tcItem.getComIntVal();
                 // 获取比较符号 >,<,=,!=
                 String compOperator = tcItem.getComparator();

@@ -102,40 +102,25 @@ public class ProjectionBolt extends BaseBasicBolt {
                     this.results.add(sb.toString());
                     break;// 目前仅支持 select * 后面没有其他映射条件
                 }
-
-//                if (curTableName.equals(tcItem.getTableName())) {
-//                    //表名相同,获取相对应的值
-//                    if (flag){
-//                        this.descOfOutputFileds.add(curTableName+"."+tcItem.getColName());
-//                    }
-//                    String getTargetVal = tuple.getStringByField(tcItem.getColName()) + ",";
-//                    sb.append(getTargetVal);
-//                }else{
-//                    // 处理join
-//                    if (flag){
-//                        this.descOfOutputFileds.add(tempKeyFieldName);
-//                    }
-//                    String getTargetVal = tuple.getStringByField(tempKeyFieldName) + ",";
-//                    sb.append(getTargetVal);
-//                }
-
-                // 处理join
-                String tempKeyFieldName = tcItem.getTableName() + "." + tcItem.getColName();
-
-                if (flag) {
-                    this.descOfOutputFileds.add(tempKeyFieldName);
+                if (curTableName.contains("|")) {
+                    // 处理join
+                    String tempKeyFieldName = tcItem.getTableName() + "." + tcItem.getColName();
+                    if (flag) {
+                        this.descOfOutputFileds.add(tempKeyFieldName);
+                    }
+                    String tVal =  tVal = tuple.getStringByField(tempKeyFieldName);
+                    String getTargetVal = tVal + ",";
+                    sb.append(getTargetVal);
+                }else{
+                    if (curTableName.equals(tcItem.getTableName())) {
+                    //表名相同,获取相对应的值
+                    if (flag){
+                        this.descOfOutputFileds.add(curTableName+"."+tcItem.getColName());
+                    }
+                    String getTargetVal = tuple.getStringByField(tcItem.getColName()) + ",";
+                    sb.append(getTargetVal);
+                    }
                 }
-                String tVal=null;
-                try {
-                    tVal = tuple.getStringByField(tempKeyFieldName);
-                }catch (Exception e){
-                    tempKeyFieldName=tcItem.getColName();
-                    tVal = tuple.getStringByField(tempKeyFieldName);
-                }
-                String getTargetVal = tVal + ",";
-                sb.append(getTargetVal);
-
-
             }
 
         }
