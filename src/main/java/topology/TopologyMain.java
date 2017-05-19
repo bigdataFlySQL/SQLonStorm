@@ -1,9 +1,7 @@
 package topology;
 
 import ParseOfSQL.ParsingSQL;
-import bolts.GroupByBolt;
-import bolts.HavingBolt;
-import bolts.ProjectionBolt;
+import bolts.*;
 import definetable.Global;
 import definetable.MField;
 import definetable.MTable;
@@ -13,16 +11,16 @@ import operation.*;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.topology.base.BaseWindowedBolt;
 import spouts.StreamDataReaderSpout;
 
-
-import bolts.SelectBolt;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class TopologyMain {
@@ -76,40 +74,56 @@ public class TopologyMain {
             // 获取每个spout 输出tuple 的属性名
             //配置第一个spout 的数据源
             String firstTabName = Selection.fromTableList.get(0);
+            MTable mFirstTable = dataBase.get(firstTabName);
             List<String> jD_02outFiledNameList = loadDataStruct(firstTabName);
-
             StreamDataReaderSpout sDataSpout = new StreamDataReaderSpout();
-            sDataSpout.setTableName(firstTabName);
+            sDataSpout.setmTable(mFirstTable);
             //设置该spout的tuple输出属性名
             sDataSpout.setDescOfOutputFileds(jD_02outFiledNameList);
+
             // 有join需求
+            boolean isJoin = false;
             StreamDataReaderSpout sjoinTableDataSpout = null;
             List<String> secSpoutOutFiledList = null;
-            HashMap<String,JoinTwoTable> joinTwoTabMap = JoinCondition.linkTablemap;
-            if (!joinTwoTabMap.isEmpty()){
-                sjoinTableDataSpout = new StreamDataReaderSpout();
+            HashMap<String, JoinTwoTable> joinTwoTabMap = JoinCondition.linkTablemap;
+            if (!joinTwoTabMap.isEmpty()) {
+                isJoin = true;
                 String joinTableName = null; // 所连接的表，目前仅支持连一个表
                 Iterator<String> keyIter = joinTwoTabMap.keySet().iterator();
-                while (keyIter.hasNext()){
+                while (keyIter.hasNext()) {
                     joinTableName = keyIter.next();
+                    joinTableName = joinTableName.split("\\|")[0];
                 }
                 secSpoutOutFiledList = loadDataStruct(joinTableName);
                 sjoinTableDataSpout = new StreamDataReaderSpout(); // 初始化join表的数据源
-                sjoinTableDataSpout.setTableName(joinTableName); // 指定数据源来自的表名
+                MTable mSecTable = dataBase.get(joinTableName);
+                sjoinTableDataSpout.setmTable(mSecTable); // 指定数据源来自的表
                 sjoinTableDataSpout.setDescOfOutputFileds(secSpoutOutFiledList);
-
             }
 
             //选择
             SelectBolt selectBolt = new SelectBolt();
             selectBolt.setDescOfOutputFileds(jD_02outFiledNameList);
+            SelectBolt selectJoinBolt = null;
+
+            //连接
+            JoinBolt joinBolt = null;
+            List<String> joinBoltOutFields = null;
+            if (isJoin) {
+                selectJoinBolt = new SelectBolt();
+                selectBolt.setDescOfOutputFileds(secSpoutOutFiledList);
+                joinBolt = (JoinBolt) new JoinBolt().withTumblingWindow(new BaseWindowedBolt.Duration(5, TimeUnit.SECONDS));
+                joinBoltOutFields = joinDataStruct();
+                joinBolt.setDescOfOutputFileds(joinBoltOutFields);
+            }
+
 
             // 分组 group by
             GroupByBolt groupByBolt = new GroupByBolt();
             List<String> groupByOutputFields = new ArrayList<>(jD_02outFiledNameList);
-            if (!AggregationStream.agreFunList.isEmpty()){
+            if (!AggregationStream.agreFunList.isEmpty()) {
                 // SQL 有分组的需求
-                for (AgregationFunFactor funFactor: AggregationStream.agreFunList){
+                for (AgregationFunFactor funFactor : AggregationStream.agreFunList) {
                     groupByOutputFields.add(funFactor.getFunFullName());
                 }
             }
@@ -132,10 +146,17 @@ public class TopologyMain {
             //Topology definition
             TopologyBuilder builder = new TopologyBuilder();
             builder.setSpout("data-reader", sDataSpout);
-            builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
-            builder.setBolt("group-by",groupByBolt).shuffleGrouping("select");
-            builder.setBolt("having", havingBolt).shuffleGrouping("group-by");
-            builder.setBolt("projection", projectionBolt).shuffleGrouping("having");
+            if (isJoin) {
+                builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
+                builder.setBolt("join", joinBolt).shuffleGrouping("select");
+                builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("join");
+
+            }
+
+//            builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
+//            builder.setBolt("group-by", groupByBolt).shuffleGrouping("select");
+//            builder.setBolt("having", havingBolt).shuffleGrouping("group-by");
+//            builder.setBolt("projection", projectionBolt).shuffleGrouping("having");
 
             //Configuration
             Config conf = new Config();
@@ -155,12 +176,10 @@ public class TopologyMain {
         }
 
 
-
     }
 
     /**
-     *
-     * @param tableName
+     * @param tableName 要获取的表名
      * @return List<String> descOfOutputFileds
      */
     private static List<String> loadDataStruct(String tableName) {
@@ -182,10 +201,11 @@ public class TopologyMain {
     }
 
     /**
-     *  获取 joinBolt 输出的outFields
+     * 获取 joinBolt 输出的outFields
+     *
      * @return joinBolt 输出的outField
      */
-    private static List<String> joinDataStruct(){
+    private static List<String> joinDataStruct() {
         List<String> JoinOutputField = new ArrayList<String>();
         JoinOutputField.add("Table");
 
@@ -193,7 +213,7 @@ public class TopologyMain {
         Iterator<String> iterator = JoinCondition.linkTablemap.keySet().iterator();
         String JoinOP = "";  // join的方式，是Left，Right或者Inner
         String compareCol = ""; // 获取连接的条件，如JData_Action_201602.sku_id = JData_Action_201603.sku_id，则该项为sku_id
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             String A = iterator.next();
             JoinTabName = A.split("\\|")[0];
             JoinOP = A.split("\\|")[1];
@@ -202,22 +222,21 @@ public class TopologyMain {
         MTable mTable_1 = dataBase.get(JoinCondition.originTabName);
         MTable mTable_2 = dataBase.get(JoinTabName);
 
-        if(JoinOP.equals("Left") || JoinOP.equals("Inner")){
-            for(MField mField:mTable_1.getField()){
+        if (JoinOP.equals("Left") || JoinOP.equals("Inner")) {
+            for (MField mField : mTable_1.getField()) {
                 JoinOutputField.add(JoinCondition.originTabName + "." + mField.getName());
             }
-            for(MField mField:mTable_2.getField()){
-                if(mField.getName().equals(compareCol))
+            for (MField mField : mTable_2.getField()) {
+                if (mField.getName().equals(compareCol))
                     continue;
                 JoinOutputField.add(JoinTabName + "." + mField.getName());
             }
-        }
-        else if(JoinOP.equals("Right")){
-            for(MField mField:mTable_2.getField()){
+        } else if (JoinOP.equals("Right")) {
+            for (MField mField : mTable_2.getField()) {
                 JoinOutputField.add(JoinTabName + "." + mField.getName());
             }
-            for(MField mField:mTable_1.getField()){
-                if(mField.getName().equals(compareCol))
+            for (MField mField : mTable_1.getField()) {
+                if (mField.getName().equals(compareCol))
                     continue;
                 JoinOutputField.add(JoinCondition.originTabName + "." + mField.getName());
             }

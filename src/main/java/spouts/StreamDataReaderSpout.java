@@ -36,7 +36,16 @@ public class StreamDataReaderSpout extends BaseRichSpout {
     private boolean completed = false;
     private ParsingSQL parsingSQL;
     private String tableName;
+    private MTable mTable;
     private List<String> descOfOutputFileds;
+
+    public MTable getmTable() {
+        return mTable;
+    }
+
+    public void setmTable(MTable mTable) {
+        this.mTable = mTable;
+    }
 
     public String getTableName() {
         return tableName;
@@ -105,24 +114,23 @@ public class StreamDataReaderSpout extends BaseRichSpout {
 
 
             Statement statement = conn.createStatement();
-            // 选择用户购物数据的2月份的数据表
-            String sql = "SELECT * FROM "+this.tableName+" LIMIT 0, 10";
+            // 选择SQL指定的数据表
+            this.tableName = this.mTable.getTablename();
+            String sql = "SELECT * FROM " + this.tableName + " LIMIT 0, 10";
             ResultSet rs = statement.executeQuery(sql);
             System.out.println("-----------------");
 
             int msgid = 1;
+            int fieldCount = this.mTable.getSize();
             while (rs.next()) {
 
                 Values emitVal = new Values();
                 //输出第一项为表名
-                emitVal.add("JData_Action_201602");
-                emitVal.add(rs.getString(1));
-                emitVal.add(rs.getString(2));
-                emitVal.add(rs.getString(3));
-                emitVal.add(rs.getString(4));
-                emitVal.add(rs.getString(5));
-                emitVal.add(rs.getString(6));
-                emitVal.add(rs.getString(7));
+                emitVal.add(this.tableName);
+                for (int i = 1; i <= fieldCount; i++) {
+                    emitVal.add(rs.getString(i));
+                }
+
 
                 this.collector.emit(emitVal, msgid++);
             }

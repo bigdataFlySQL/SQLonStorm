@@ -12,6 +12,38 @@ public class MTable {
     private ArrayList<MField> fields;
     private int size;
 
+    public String getTablename() {
+        return tablename;
+    }
+
+    public void setTablename(String tablename) {
+        this.tablename = tablename;
+    }
+
+    public String getDatabase_name() {
+        return database_name;
+    }
+
+    public void setDatabase_name(String database_name) {
+        this.database_name = database_name;
+    }
+
+    public ArrayList<MField> getFields() {
+        return fields;
+    }
+
+    public void setFields(ArrayList<MField> fields) {
+        this.fields = fields;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     /**
      * set_mTable函数，设置函数
      * @param tablename 表名
