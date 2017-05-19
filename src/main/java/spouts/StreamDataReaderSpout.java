@@ -36,16 +36,16 @@ public class StreamDataReaderSpout extends BaseRichSpout {
     private boolean completed = false;
     private ParsingSQL parsingSQL;
     private String tableName;
-    private MTable mTable;
+
     private List<String> descOfOutputFileds;
 
-    public MTable getmTable() {
-        return mTable;
-    }
-
-    public void setmTable(MTable mTable) {
-        this.mTable = mTable;
-    }
+//    public MTable getmTable() {
+//        return mTable;
+//    }
+//
+//    public void setmTable(MTable mTable) {
+//        this.mTable = mTable;
+//    }
 
     public String getTableName() {
         return tableName;
@@ -115,13 +115,17 @@ public class StreamDataReaderSpout extends BaseRichSpout {
 
             Statement statement = conn.createStatement();
             // 选择SQL指定的数据表
-            this.tableName = this.mTable.getTablename();
+            MTable mTable = Global.DataBase.get(this.tableName);
             String sql = "SELECT * FROM " + this.tableName + " LIMIT 0, 10";
             ResultSet rs = statement.executeQuery(sql);
             System.out.println("-----------------");
 
             int msgid = 1;
-            int fieldCount = this.mTable.getSize();
+            int fieldCount = mTable.getSize();
+            if (fieldCount==6){
+                System.out.print("fe");
+                int er=23;
+            }
             while (rs.next()) {
 
                 Values emitVal = new Values();

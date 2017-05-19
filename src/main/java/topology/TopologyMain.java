@@ -77,7 +77,8 @@ public class TopologyMain {
             MTable mFirstTable = dataBase.get(firstTabName);
             List<String> jD_02outFiledNameList = loadDataStruct(firstTabName);
             StreamDataReaderSpout sDataSpout = new StreamDataReaderSpout();
-            sDataSpout.setmTable(mFirstTable);
+//            sDataSpout.setmTable(mFirstTable);
+            sDataSpout.setTableName(firstTabName);
             //设置该spout的tuple输出属性名
             sDataSpout.setDescOfOutputFileds(jD_02outFiledNameList);
 
@@ -97,7 +98,8 @@ public class TopologyMain {
                 secSpoutOutFiledList = loadDataStruct(joinTableName);
                 sjoinTableDataSpout = new StreamDataReaderSpout(); // 初始化join表的数据源
                 MTable mSecTable = dataBase.get(joinTableName);
-                sjoinTableDataSpout.setmTable(mSecTable); // 指定数据源来自的表
+                sjoinTableDataSpout.setTableName(joinTableName);
+//                sjoinTableDataSpout.setmTable(mSecTable); // 指定数据源来自的表
                 sjoinTableDataSpout.setDescOfOutputFileds(secSpoutOutFiledList);
             }
 
@@ -111,7 +113,7 @@ public class TopologyMain {
             List<String> joinBoltOutFields = null;
             if (isJoin) {
                 selectJoinBolt = new SelectBolt();
-                selectBolt.setDescOfOutputFileds(secSpoutOutFiledList);
+                selectJoinBolt.setDescOfOutputFileds(secSpoutOutFiledList);
                 joinBolt = (JoinBolt) new JoinBolt().withTumblingWindow(new BaseWindowedBolt.Duration(5, TimeUnit.SECONDS));
                 joinBoltOutFields = joinDataStruct();
                 joinBolt.setDescOfOutputFileds(joinBoltOutFields);
@@ -146,9 +148,11 @@ public class TopologyMain {
             //Topology definition
             TopologyBuilder builder = new TopologyBuilder();
             builder.setSpout("data-reader", sDataSpout);
+            builder.setSpout("join-data-reader",sjoinTableDataSpout);
             if (isJoin) {
                 builder.setBolt("select", selectBolt).shuffleGrouping("data-reader");
-                builder.setBolt("join", joinBolt).shuffleGrouping("select");
+                builder.setBolt("select-join",selectJoinBolt).shuffleGrouping("join-data-reader");
+                builder.setBolt("join", joinBolt).shuffleGrouping("select").shuffleGrouping("select-join");
                 builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("join");
 
             }

@@ -88,6 +88,7 @@ public class SelectBolt extends BaseBasicBolt {
 
         } else {
             // 无SQL 选择操作需求，tuple直接流入下一个bolt
+            int fc = input.getValues().size();
             collector.emit(input.getValues());
         }
     }
@@ -166,7 +167,12 @@ public class SelectBolt extends BaseBasicBolt {
      * 输出元组数据属性名到下一个bolt
      */
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        if (this.descOfOutputFileds == null){
+            System.out.print("we");
+
+        }
         Fields fields = new Fields(this.descOfOutputFileds);
+
         declarer.declare(fields);
     }
 
