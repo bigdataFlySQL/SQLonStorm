@@ -35,7 +35,16 @@ public class StreamDataReaderSpout extends BaseRichSpout {
     private FileReader fileReader;
     private boolean completed = false;
     private ParsingSQL parsingSQL;
+    private String tableName;
     private List<String> descOfOutputFileds;
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
     public List<String> getDescOfOutputFileds() {
         return descOfOutputFileds;
@@ -97,7 +106,7 @@ public class StreamDataReaderSpout extends BaseRichSpout {
 
             Statement statement = conn.createStatement();
             // 选择用户购物数据的2月份的数据表
-            String sql = "SELECT * FROM JData_Action_201602 LIMIT 0, 10";
+            String sql = "SELECT * FROM "+this.tableName+" LIMIT 0, 10";
             ResultSet rs = statement.executeQuery(sql);
             System.out.println("-----------------");
 

@@ -41,9 +41,6 @@ public class TopologyMain {
             dataBase = Global.DataBase;
             //endregion
 
-            // 获取每个spout 输出tuple 的属性名
-            List<String> jD_02outFiledNameList = loadDataStruct("JData_Action_201602");
-
             fileReader = new FileReader(ProjectConfig.res_inputSQL_path);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String sql = "";
@@ -76,11 +73,32 @@ public class TopologyMain {
             bufferedReader.close();
             fileReader.close();
 
-
+            // 获取每个spout 输出tuple 的属性名
+            //配置第一个spout 的数据源
+            String firstTabName = Selection.fromTableList.get(0);
+            List<String> jD_02outFiledNameList = loadDataStruct(firstTabName);
 
             StreamDataReaderSpout sDataSpout = new StreamDataReaderSpout();
+            sDataSpout.setTableName(firstTabName);
             //设置该spout的tuple输出属性名
             sDataSpout.setDescOfOutputFileds(jD_02outFiledNameList);
+            // 有join需求
+            StreamDataReaderSpout sjoinTableDataSpout = null;
+            List<String> secSpoutOutFiledList = null;
+            HashMap<String,JoinTwoTable> joinTwoTabMap = JoinCondition.linkTablemap;
+            if (!joinTwoTabMap.isEmpty()){
+                sjoinTableDataSpout = new StreamDataReaderSpout();
+                String joinTableName = null; // 所连接的表，目前仅支持连一个表
+                Iterator<String> keyIter = joinTwoTabMap.keySet().iterator();
+                while (keyIter.hasNext()){
+                    joinTableName = keyIter.next();
+                }
+                secSpoutOutFiledList = loadDataStruct(joinTableName);
+                sjoinTableDataSpout = new StreamDataReaderSpout(); // 初始化join表的数据源
+                sjoinTableDataSpout.setTableName(joinTableName); // 指定数据源来自的表名
+                sjoinTableDataSpout.setDescOfOutputFileds(secSpoutOutFiledList);
+
+            }
 
             //选择
             SelectBolt selectBolt = new SelectBolt();
@@ -161,5 +179,49 @@ public class TopologyMain {
         }
         return descOfOutputFileds;
 
+    }
+
+    /**
+     *  获取 joinBolt 输出的outFields
+     * @return joinBolt 输出的outField
+     */
+    private static List<String> joinDataStruct(){
+        List<String> JoinOutputField = new ArrayList<String>();
+        JoinOutputField.add("Table");
+
+        String JoinTabName = "";  // 获取连接表表名
+        Iterator<String> iterator = JoinCondition.linkTablemap.keySet().iterator();
+        String JoinOP = "";  // join的方式，是Left，Right或者Inner
+        String compareCol = ""; // 获取连接的条件，如JData_Action_201602.sku_id = JData_Action_201603.sku_id，则该项为sku_id
+        while (iterator.hasNext()){
+            String A = iterator.next();
+            JoinTabName = A.split("\\|")[0];
+            JoinOP = A.split("\\|")[1];
+            compareCol = JoinCondition.linkTablemap.get(A).getTcItemRight().getColName();
+        }
+        MTable mTable_1 = dataBase.get(JoinCondition.originTabName);
+        MTable mTable_2 = dataBase.get(JoinTabName);
+
+        if(JoinOP.equals("Left") || JoinOP.equals("Inner")){
+            for(MField mField:mTable_1.getField()){
+                JoinOutputField.add(JoinCondition.originTabName + "." + mField.getName());
+            }
+            for(MField mField:mTable_2.getField()){
+                if(mField.getName().equals(compareCol))
+                    continue;
+                JoinOutputField.add(JoinTabName + "." + mField.getName());
+            }
+        }
+        else if(JoinOP.equals("Right")){
+            for(MField mField:mTable_2.getField()){
+                JoinOutputField.add(JoinTabName + "." + mField.getName());
+            }
+            for(MField mField:mTable_1.getField()){
+                if(mField.getName().equals(compareCol))
+                    continue;
+                JoinOutputField.add(JoinCondition.originTabName + "." + mField.getName());
+            }
+        }
+        return JoinOutputField;
     }
 }

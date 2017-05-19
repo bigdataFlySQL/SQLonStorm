@@ -20,6 +20,7 @@ package bolts;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 
 import java.io.FileWriter;
@@ -34,29 +35,22 @@ public class PrinterBolt extends BaseBasicBolt {
   @Override
   public void cleanup() {
     super.cleanup();
-    for(Integer item:results){
-      System.out.println(item);
-      ans += item;
-    }
-    if (ans>=100){
-      System.out.println("succeed");
-    }
 
-    try{
-      FileWriter fileWriter = new FileWriter("/Users/yuxiao/项目/stormSQL/code/SQLonStorm/src/main/resources/result.txt",true);
-      System.out.println("ans "+ans);
-    fileWriter.write(ans+""+"\n");
-    }catch (Exception e){
-      e.printStackTrace();
-    }
 
   }
 
   @Override
   public void execute(Tuple tuple, BasicOutputCollector collector) {
 
-    System.out.println("lilele: "+tuple);
-    results.add((Integer) tuple.getValue(0));
+//    System.out.println("lilele: "+tuple);
+    System.out.println("print bolt **********************************");
+    for(String string:tuple.getFields()){
+        System.out.println(string);
+        System.out.println(tuple.getValueByField(string));
+    }
+
+
+
   }
 
   @Override
