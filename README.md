@@ -33,7 +33,7 @@ select JData_Action_201602.user_id, max(JData_Action_201602.brand) as bc from JD
 ``` 
 
 - 连接(Join) Join连接操作目前仅支持两个表之间的连接。它支持inner,left,right 三种join。此外，它基于Storm的TumblingWindow时间滚动窗口实现，默认为将6秒内的流数据进行连接。
-``` 
+``` sql
 select JData_Action_201602.user_id,max(JData_Product.attr2) FROM JData_Action_201602 INNER JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate group by JData_Action_201602.user_id;
 select * FROM JData_Action_201602 left JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate
 
@@ -42,7 +42,7 @@ select * FROM JData_Action_201602 right JOIN JData_Product ON JData_Action_20160
 
 - 分组 基于时间滚动窗口的分组(Group-by) SQL分组语法基于基于Storm的TumblingWindow时间滚动窗口实现，默认将2秒内的流数据进行分组。可支持多个grouby 条件。
 
-``` 
+``` sql
 
 select JData_Action_201602.user_id FROM JData_Action_201602 INNER JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate group by JData_Action_201602.user_id;
 ``` 
@@ -83,7 +83,7 @@ git clone https://github.com/bigdataFlySQL/SQLonStorm.git
 
 
 
-###使用方法
+### 使用方法
 1. 修改join 连接操作的时间段长度。在 /java/topology/TopologyMain.java 中代码片段
     
     <img src=http://7xtc7i.com1.z0.glb.clouddn.com/join.png />
