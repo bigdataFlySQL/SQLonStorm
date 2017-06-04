@@ -1,5 +1,5 @@
 
-## SQLonStorm
+## SQLonStorm 0.2
 SQLonStorm 是一个基于Storm1.1.2 的流数据查询引擎。类似于Hive能够为Hadoop提供SQL语法查询支持，SQLonStorm 的最大特点也是支持SQL语法对Storm上的流数据进行查询。
   
 SQLonStorm 目前版本可以实现简单的选择（Selection）、映射（Projection）、基于时间滚动窗口的连接(Join),基于时间滚动窗口的分组(Group-by)以及聚合（Aggregation)操作。五种操作的支持范围请见示例介绍。
@@ -10,7 +10,7 @@ SQLonStorm 目前版本可以实现简单的选择（Selection）、映射（Pro
 
 ---
 
-####示例:  
+#### 示例:  
 - 选择（Selection) 广泛支持各种包含and、or和括号的条件表达式。不限选择条件的个数。支持>,<,=,!= 四种比较操作符。
 
 ``` sql
@@ -59,34 +59,45 @@ select JData_Action_201602.type, count(JData_Action_201602.sku_id) as bc from JD
 
 
 
-###特性（可选）
-- 特性A
+### 原理说明
 
-- 特性B
-
-###原理说明（可选）
-阐述项目是基于什么思路设计的
  实现原理如下图：
     <img src=http://7xtc7i.com1.z0.glb.clouddn.com/Snip20170517_1.png  />
 
 
 
 ### 下载安装
+1. git clone
 ```
 git clone https://github.com/bigdataFlySQL/SQLonStorm.git
 ```
-(说明项目的配置方法，android开源库多用Gradle导入)
+2. 在/java/domain 文件夹下，新建一个ProjectConfig.java 文件，为SQLonStorm 的系统配置文件。
+  示例如下图，请根据各自电脑的系统环境填写好相关的信息：
+<img src=http://7xtc7i.com1.z0.glb.clouddn.com/Snip20170604_4.png  />
+
+3. 利用/resources/createtabledata.txt 在Mysql 创建好相关的数据库表，数据自行添加。
+
+4. 在//resources/InputSQL.txt 中填写好需要查询的SQL 语句，注意目前只能填写一句。
+
+5. 执行/java/topology/TopologyMain.java 中的Main函数，在result.txt 中可查看到SQL语句输出结果。
+
+
 
 ###使用方法
+1. 修改join 连接操作的时间段长度。在 /java/topology/TopologyMain.java 中代码片段
+    
+    <img src=http://7xtc7i.com1.z0.glb.clouddn.com/join.png />
+    
+    修改对应的时间段数值。
+2. group-by 分组操作的时间段长度。在 /java/topology/TopologyMain.java 中代码片段
+    
+    <img src=http://7xtc7i.com1.z0.glb.clouddn.com/group.png />
+    
+    修改对应的时间段数值。
+ 
+ 
 
-在domain 文件
 
-
-### 注意事项
-比如混淆方法等
-
-###TODO（可选）
-接下来的开发/维护计划。
 
 ## License
-遵守的协议
+Apache-2.0
