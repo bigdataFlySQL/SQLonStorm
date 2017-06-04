@@ -77,7 +77,7 @@ git clone https://github.com/bigdataFlySQL/SQLonStorm.git
 
 3. 利用/resources/createtabledata.txt 在Mysql 创建好相关的数据库表，数据自行添加。
 
-4. 在//resources/InputSQL.txt 中填写好需要查询的SQL 语句，注意目前只能填写一句。
+4. 在/resources/InputSQL.txt 中填写好需要查询的SQL 语句，注意目前只能填写一句。
 
 5. 执行/java/topology/TopologyMain.java 中的Main函数，在result.txt 中可查看到SQL语句输出结果。
 
