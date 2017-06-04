@@ -1,3 +1,5 @@
+SELECT JData_Action_201602.sku_id, JData_Action_201602.cate FROM JData_Action_201602 where JData_Action_201602.brand>100 or (JData_Action_201602.cate >4 AND JData_Action_201602.type=1);
+
 select JData_Action_201602.user_id,max(JData_Product.attr2) FROM JData_Action_201602 INNER JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate group by JData_Action_201602.user_id;
 
 select JData_Action_201602.sku_id,JData_Product.brand FROM JData_Action_201602 INNER JOIN JData_Product ON JData_Action_201602.cate = JData_Product.cate;
