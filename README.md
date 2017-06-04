@@ -50,7 +50,7 @@ select JData_Action_201602.user_id FROM JData_Action_201602 INNER JOIN JData_Pro
 
 - 聚合（Aggregation)操作。 SQLonStorm目前版本仅支持max、count 两种聚合条件。支持>,<,=,!= 四种比较操作符。
 
-``` 
+``` sql
 
 select JData_Action_201602.user_id, max(JData_Action_201602.brand) as bc from JData_Action_201602  group by JData_Action_201602.user_id having max(JData_Action_201602.brand) > 200;
 select JData_Action_201602.type, count(JData_Action_201602.sku_id) as bc from JData_Action_201602  group by JData_Action_201602.type having count(JData_Action_201602.sku_id) > 5;
